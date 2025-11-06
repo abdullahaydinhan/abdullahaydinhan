@@ -22,5 +22,17 @@
     ],
     "desc": "",
     "valid": true
+  },
+  {
+    "name": "Milyoner9 2   Kopya",
+    "path": "games/Milyoner9_2 - Kopya/",
+    "emoji": "🎮",
+    "unit": "9.2",
+    "level": "",
+    "tags": [
+      "vocabulary"
+    ],
+    "desc": "",
+    "valid": true
   }
 ]
