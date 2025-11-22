@@ -1,316 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>English Teacher's Game Hub</title>
-  
-  <link rel="stylesheet" href="assets/style.css"> 
-  <script defer src="assets/script.js"></script>
-
-  <style>
-    /* Temel Stil Ayarları */
-    :root {
-        --bg-color: #f5f5f5; --primary-color: #16213e; --accent-color: #e94560; 
-        --accent-hover-color: #533483; --text-color: #333; 
-        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    body {
-        font-family: var(--font-family); background-color: var(--bg-color);
-        color: var(--text-color); line-height: 1.6; margin: 0; min-height: 100vh;
-        display: flex; flex-direction: column;
-    }
-    header {
-        background-color: var(--primary-color); color: white; padding: 20px 40px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex;
-        justify-content: space-between; align-items: center;
-    }
-    header h1 { margin: 0; color: var(--accent-color); }
-    nav a {
-        color: white; text-decoration: none; padding: 10px 15px; margin-left: 10px;
-        transition: background-color 0.3s; border-radius: 5px;
-    }
-    nav a.active, nav a:hover { background-color: var(--accent-hover-color); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Teacher's Game Hub</title>
     
-    /* Hero Section */
-    .hero { background-color: #e0f7fa; color: #16213e; padding: 80px 40px;
-        text-align: center; margin-bottom: 20px;
-    }
-    .hero h2 { font-size: 2.5rem; margin-bottom: 15px; }
-    
-    /* Sınıf Başlıkları Stili */
-    .grade-section-title {
-        text-align: left;
-        color: var(--primary-color);
-        margin: 40px 0 20px 0;
-        padding: 10px 20px;
-        border-bottom: 3px solid var(--accent-color);
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-        font-size: 1.8rem;
-    }
+    <link rel="stylesheet" href="assets/style.css"> 
+    <script defer src="assets/script.js"></script>
 
-    /* Oyunların listelendiği ızgara yapısı */
-    .games-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 25px;
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
+    <style>
+        /* Temel Stil Ayarları */
+        :root {
+            --bg-color: #f5f5f5; --primary-color: #16213e; --accent-color: #e94560; 
+            --accent-hover-color: #533483; --text-color: #333; 
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            font-family: var(--font-family); background-color: var(--bg-color);
+            color: var(--text-color); line-height: 1.6; margin: 0; min-height: 100vh;
+            display: flex; flex-direction: column;
+        }
+        header {
+            background-color: var(--primary-color); color: white; padding: 20px 40px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        header h1 { margin: 0; color: var(--accent-color); }
+        nav a {
+            color: white; text-decoration: none; padding: 10px 15px; margin-left: 10px;
+            transition: background-color 0.3s; border-radius: 5px;
+        }
+        nav a.active, nav a:hover { background-color: var(--accent-hover-color); }
+        
+        .hero { background-color: #e0f7fa; color: #16213e; padding: 80px 40px;
+            text-align: center; margin-bottom: 20px;
+        }
+        .hero h2 { font-size: 2.5rem; margin-bottom: 15px; }
+        
+        .grade-section-title {
+            text-align: left; color: var(--primary-color); margin: 40px 0 20px 0;
+            padding: 10px 20px; border-bottom: 3px solid var(--accent-color);
+            max-width: 1200px; margin-left: auto; margin-right: auto; font-size: 1.8rem;
+        }
 
-    /* Oyun Kartı Temel Tasarımı */
-    .game-card {
-        background: #ffffff; border-radius: 15px; padding: 25px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: 1px solid #eee; display: flex; flex-direction: column;
-        justify-content: space-between;
-    }
+        .games-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px; padding: 20px; max-width: 1200px; margin: 0 auto;
+        }
 
-    .game-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .game-card {
+            background: #ffffff; border-radius: 15px; padding: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #eee; display: flex; flex-direction: column;
+            justify-content: space-between;
+        }
 
-    /* **FARKLI KLASÖR TİPLERİ İÇİN FARKLI STİL UYGULAMA** */
-    .card-activity {
-        /* Interactive_Activities Klasöründen gelenler (Mavi Tema) */
-        border: 3px solid #3498db; 
-        box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-    }
-    .card-game {
-        /* Games Klasöründen gelenler (Kırmızı Tema) */
-        border: 3px solid var(--accent-color); 
-        box-shadow: 0 4px 10px rgba(233, 69, 96, 0.3);
-        background-color: #fff8f8; 
-    }
-    /* -------------------------------------------------- */
+        .game-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
 
-    .game-card h3 { color: var(--primary-color); margin-bottom: 10px; font-size: 1.4rem; }
-    .game-card p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
-    .play-btn {
-        display: inline-block; background-color: var(--accent-color);
-        color: white; padding: 10px 20px; border-radius: 25px;
-        text-decoration: none; font-weight: bold; margin-top: auto; 
-        transition: background 0.3s;
-    }
-    .play-btn:hover { background-color: var(--accent-hover-color); }
-    .level-badge {
-        color: white; padding: 4px 8px; border-radius: 4px;
-        font-size: 0.8rem; margin-bottom: 10px; display: inline-block;
-        font-weight: bold;
-    }
+        .card-activity {
+            border: 3px solid #3498db; box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+        }
+        .card-game {
+            border: 3px solid var(--accent-color); box-shadow: 0 4px 10px rgba(233, 69, 96, 0.3);
+            background-color: #fff8f8; 
+        }
 
-    /* Footer */
-    footer {
-        background-color: var(--primary-color); color: white;
-        text-align: center; padding: 15px; margin-top: auto; 
-    }
-  </style>
+        .game-card h3 { color: var(--primary-color); margin-bottom: 10px; font-size: 1.4rem; }
+        .game-card p { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+        .play-btn {
+            display: inline-block; background-color: var(--accent-color);
+            color: white; padding: 10px 20px; border-radius: 25px;
+            text-decoration: none; font-weight: bold; margin-top: auto; 
+            transition: background 0.3s;
+        }
+        .play-btn:hover { background-color: var(--accent-hover-color); }
+        .level-badge {
+            color: white; padding: 4px 8px; border-radius: 4px;
+            font-size: 0.8rem; margin-bottom: 10px; display: inline-block;
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: var(--primary-color); color: white;
+            text-align: center; padding: 15px; margin-top: auto; 
+        }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>🎓 English Teacher's Game Hub</h1>
-    <nav id="navbar">
-      <a href="index.html" class="active">Home</a>
-      <a href="#all-content-container">Content</a>
-      <a href="Interactive_Activities/index.html">Interactive Activities</a> 
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-  </header>
+    <header>
+        <h1>🎓 English Teacher's Game Hub</h1>
+        <nav id="navbar">
+            <a href="index.html" class="active">Home</a>
+            <a href="#all-content-container">Content</a>
+            <a href="Interactive_Activities/index.html">Interactive Activities</a> 
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+    </header>
 
-  <main>
-    <section class="hero">
-      <h2>Welcome to Your Learning Playground!</h2>
-      <p>Fun and interactive English games and activities, organized by grade level! 🧠</p>
-      <a href="#all-content-container" class="btn">🎮 View Content by Grade</a>
-    </section>
+    <main>
+        <section class="hero">
+            <h2>Welcome to Your Learning Playground!</h2>
+            <p>Fun and interactive English games and activities, organized by grade level! 🧠</p>
+            <a href="#all-content-container" class="btn">🎮 View Content by Grade</a>
+        </section>
 
-    <section id="all-content-container">
-        <h2 style="text-align: center; color: var(--primary-color); padding-top: 20px;">🔥 Content by Grade Level</h2>
+        <section id="all-content-container">
+            <h2 style="text-align: center; color: var(--primary-color); padding-top: 20px;">🔥 Content by Grade Level</h2>
+            
+            <p style="text-align:center; color:#999; padding:20px;">İçerikler yükleniyor... Lütfen bekleyin.</p>
+        </section>
+
+        <section class="info" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+            <h3 style="color: var(--accent-color);">🎯 Purpose</h3>
+            <p>This site is designed for English language learners to enjoy vocabulary, grammar, and speaking practice through interactive games and quizzes.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 English Teacher’s Game Hub | Designed with ❤️ for students</p>
+    </footer>
+
+    <script>
+        // --- AYARLAR ---
+        const username = "hunter5234"; // GitHub kullanıcı adınız
+        const repo = "english-game-hub"; // GitHub deponuzun adı
         
-        <p style="text-align:center; color:#999; padding:20px;">İçerikler yükleniyor... Lütfen bekleyin.</p>
-    </section>
+        // İÇERİK TİPLERİ VE SINIF SEVİYELERİ
+        const SOURCE_FOLDERS = ["Games", "Interactive_Activities"]; 
+        
+        // DÜZELTİLMİŞ: Sınıf adları Sizin son teyidinize göre (TÜMÜ BÜYÜK HARF)
+        const GRADE_LEVELS = ["9TH_GRADE", "10TH_GRADE", "11TH_GRADE", "12TH_GRADE"]; 
+        
+        const allContentContainer = document.getElementById('all-content-container');
 
-    <section class="info" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
-      <h3 style="color: var(--accent-color);">🎯 Purpose</h3>
-      <p>This site is designed for English language learners to enjoy vocabulary, grammar, and speaking practice through interactive games and quizzes.</p>
-    </section>
-  </main>
+        // --- ÖZEL OYUN BİLGİLERİ (Kart Başlıklarını Düzenlemek İçin) ---
+        // Lütfen bu dosya adlarının GitHub'daki gerçek adlarla BİREBİR EŞLEŞTİĞİNDEN emin olun.
+        const customGameDetails = {
+            // Interactive Activities için tam dosya adları (ÖRN: 9.1.R. Land of Fire PAGE 30.html)
+            "Land_of_Fire.html": { title: "Land of Fire Reading", level: "9. Sınıf Aktivitesi", desc: "Azerbaycan ile ilgili okuma ve anlama pratiği.", badgeColor: "#f39c12" },
+            "Digital_World.html": { title: "Safer Digital World Quiz", level: "9. Sınıf Aktivitesi", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
+            
+            // Eğer dosya adlarınız uzunsa, tam adlarını kullanın:
+            "9.1.R. Land of Fire PAGE 30.html": { title: "Land of Fire Reading (Page 30)", level: "9. Sınıf Aktivitesi", desc: "Azerbaycan okuma anlama pratiği.", badgeColor: "#f39c12" },
+            "9.1.R. Getting Ready for a Safer Digital World Page 34.html": { title: "Safer Digital World (Page 34)", level: "9. Sınıf Aktivitesi", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
+            
+            // Games için KLASÖR ADLARI (uzantısız):
+            "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Sınav", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
+            "Simple_Vocabulary_Quiz": { title: "Simple Vocab Quiz", level: "Hızlı Test", desc: "Temel kelime testi.", badgeColor: "#3498db" }
+        };
 
-  <footer>
-    <p>© 2025 English Teacher’s Game Hub | Designed with ❤️ for students</p>
-  </footer>
+        /**
+         * Belirtilen GitHub klasöründen içerikleri çeker ve kaynak/seviye bilgisini ekler.
+         */
+        async function fetchFolderContent(sourceFolder, gradeFolder) {
+            const fullPath = `${sourceFolder}/${gradeFolder}`;
+            const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${fullPath}`;
+            
+            const response = await fetch(apiUrl);
 
-<script>
-  // --- AYARLAR ---
-  const username = "hunter5234"; // GitHub kullanıcı adınız
-  const repo = "english-game-hub"; // GitHub deponuzun adı
-  
-  // İÇERİK TİPLERİ VE SINIF SEVİYELERİ
-  // DÜZELTME 1: Games (Büyük G) ve Interactive_Activities (Alt çizgi)
-  const SOURCE_FOLDERS = ["Games", "Interactive_Activities"]; 
-  
-  // DÜZELTME 2: Sınıf adları tam olarak GitHub'daki gibi 
-  const GRADE_LEVELS = ["9TH_GRADE", "10TH_GRADE", "11TH_GRADE", "12TH_GRADE"]; 
-  
-  const allContentContainer = document.getElementById('all-content-container');
+            // 404 (bulunamadı) veya boş klasör ise boş dizi döndür
+            if (!response.ok || response.status === 404) return []; 
+            // API limitine takılma kontrolü
+            if (response.status === 403) throw new Error('GitHub API Limitine ulaşıldı.');
+            
+            const data = await response.json();
+            
+            return data.map(item => ({
+                ...item,
+                sourceFolder: sourceFolder,
+                gradeFolder: gradeFolder
+            }));
+        }
 
-  // --- ÖZEL OYUN BİLGİLERİ (Kart Başlıklarını Düzenlemek İçin) ---
-  const customGameDetails = {
-      // Aktivite Dosyaları (Interactive_Activities klasörü için)
-      "Land_of_Fire.html": { title: "Land of Fire Reading", level: "9. Sınıf Aktivitesi", desc: "Azerbaycan ile ilgili okuma ve anlama pratiği.", badgeColor: "#f39c12" },
-      "Digital_World.html": { title: "Safer Digital World Quiz", level: "9. Sınıf Aktivitesi", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
-      // Oyun Klasörleri (Games klasörü için - SADECE KLASÖR ADI uzantısız)
-      "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Sınav", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
-      "Simple_Vocabulary_Quiz": { title: "Simple Vocab Quiz", level: "Hızlı Test", desc: "Temel kelime testi.", badgeColor: "#3498db" }
-  };
+        async function fetchAllContent() {
+            try {
+                // 1. ADIM: TÜM KLASÖRLERDEN VERİLERİ ÇEK
+                const fetchPromises = [];
+                SOURCE_FOLDERS.forEach(source => {
+                    GRADE_LEVELS.forEach(grade => {
+                        fetchPromises.push(fetchFolderContent(source, grade));
+                    });
+                });
 
-  /**
-   * Belirtilen GitHub klasöründen içerikleri çeker ve kaynak/seviye bilgisini ekler.
-   */
-  async function fetchFolderContent(sourceFolder, gradeFolder) {
-    const fullPath = `${sourceFolder}/${gradeFolder}`;
-    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${fullPath}`;
-    
-    const response = await fetch(apiUrl);
+                const results = await Promise.all(fetchPromises);
+                let allData = results.flat(); 
+                
+                allContentContainer.innerHTML = ''; 
+                
+                if (allData.length === 0) {
+                    allContentContainer.innerHTML += '<p style="text-align:center; color:red; padding:20px;">HATA: Henüz listelenecek içerik bulunamadı. Lütfen klasör adlarının (Games, 9TH_GRADE vb.) BÜYÜK/KÜÇÜK harf dahil tam eşleştiğinden emin olun. Konsol sekmesinde 404 hatalarını kontrol edin.</p>';
+                    return;
+                }
+                
+                // 2. ADIM: GRUPLA VE SIRALA
+                allData.sort((a, b) => b.name.localeCompare(a.name)); 
+                
+                const groupedData = allData.reduce((acc, item) => {
+                    acc[item.gradeFolder] = acc[item.gradeFolder] || [];
+                    acc[item.gradeFolder].push(item);
+                    return acc;
+                }, {});
 
-    // 404 (bulunamadı) veya boş klasör ise boş dizi döndür
-    if (!response.ok || response.status === 404) return []; 
-    // API limitine takılma kontrolü
-    if (response.status === 403) throw new Error('GitHub API Limitine ulaşıldı.');
-    
-    const data = await response.json();
-    
-    return data.map(item => ({
-        ...item,
-        sourceFolder: sourceFolder,
-        gradeFolder: gradeFolder
-    }));
-  }
+                // 3. ADIM: SAYFAYA İÇERİKLERİ YAZDIR
+                GRADE_LEVELS.forEach(grade => {
+                    const gradeItems = groupedData[grade];
+                    if (!gradeItems || gradeItems.length === 0) return;
 
-  async function fetchAllContent() {
-    try {
-      // 1. ADIM: TÜM KLASÖRLERDEN VERİLERİ ÇEK
-      const fetchPromises = [];
-      SOURCE_FOLDERS.forEach(source => {
-        GRADE_LEVELS.forEach(grade => {
-          fetchPromises.push(fetchFolderContent(source, grade));
-        });
-      });
+                    // Sınıf Başlığını Oluştur
+                    const gradeTitle = document.createElement('h2');
+                    gradeTitle.className = 'grade-section-title';
+                    gradeTitle.textContent = grade.replace('_', ' ').toUpperCase(); 
+                    allContentContainer.appendChild(gradeTitle);
 
-      const results = await Promise.all(fetchPromises);
-      let allData = results.flat(); 
-      
-      allContentContainer.innerHTML = ''; 
-      
-      if (allData.length === 0) {
-          allContentContainer.innerHTML += '<p style="text-align:center; color:red; padding:20px;">HATA: Henüz listelenecek içerik bulunamadı. Lütfen klasör ve dosya adlarının JavaScript değişkenlerinizle (yukarıdaki 9TH_Grade gibi) tam eşleştiğinden emin olun.</p>';
-          return;
-      }
-      
-      // 2. ADIM: GRUPLA VE SIRALA
-      // En yeni/son eklenen üstte olması için ters alfabetik sıralama
-      allData.sort((a, b) => b.name.localeCompare(a.name)); 
-      
-      const groupedData = allData.reduce((acc, item) => {
-        acc[item.gradeFolder] = acc[item.gradeFolder] || [];
-        acc[item.gradeFolder].push(item);
-        return acc;
-      }, {});
+                    // Grid Konteynerini Oluştur
+                    const gamesGrid = document.createElement('div');
+                    gamesGrid.className = 'games-grid';
 
-      // 3. ADIM: SAYFAYA İÇERİKLERİ YAZDIR
-      GRADE_LEVELS.forEach(grade => {
-        const gradeItems = groupedData[grade];
-        if (!gradeItems || gradeItems.length === 0) return;
+                    gradeItems.forEach(item => {
+                        let fileName = item.name;
+                        let gameUrl = "";
+                        let sourceFolder = item.sourceFolder;
+                        
+                        // URL belirleme ve Filtreleme
+                        if (sourceFolder === "Games" && item.type === 'dir') {
+                            gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}/index.html`;
+                        } 
+                        else if (sourceFolder === "Interactive_Activities" && item.type === 'file' && fileName.endsWith('.html')) {
+                            gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}`;
+                        } else {
+                            // Liste dışı kalan dosyaları/klasörleri atla
+                            return; 
+                        }
 
-        // Sınıf Başlığını Oluştur (Örn: 9th_grade -> 9TH GRADE)
-        const gradeTitle = document.createElement('h2');
-        gradeTitle.className = 'grade-section-title';
-        gradeTitle.textContent = grade.replace('_', ' ').toUpperCase(); 
-        allContentContainer.appendChild(gradeTitle);
+                        // Varsayılan Değerler
+                        let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim();
+                        let desc = "";
+                        let level = "";
+                        let badgeStyle = "background: #3498db;"; 
+                        let cardClass = ""; 
 
-        // Grid Konteynerini Oluştur
-        const gamesGrid = document.createElement('div');
-        gamesGrid.className = 'games-grid';
+                        if (sourceFolder === "Games") {
+                            level = "Game";
+                            desc = "An interactive game from the sub-directory.";
+                            cardClass = "card-game";
+                        } else if (sourceFolder === "Interactive_Activities") {
+                            level = "Interactive Activity"; 
+                            desc = "A reading or vocabulary practice session.";
+                            cardClass = "card-activity"; 
+                        }
 
-        gradeItems.forEach(item => {
-          let fileName = item.name;
-          let gameUrl = "";
-          let sourceFolder = item.sourceFolder;
-          
-          // URL belirleme
-          if (sourceFolder === "Games" && item.type === 'dir') {
-              // Games klasörü altındaki oyunlar (klasör içindeki index.html'e gider)
-              gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}/index.html`;
-          } 
-          else if (sourceFolder === "Interactive_Activities" && item.type === 'file' && fileName.endsWith('.html')) {
-              // Interactive Activities altındaki HTML dosyaları (doğrudan dosyaya gider)
-              gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}`;
-          } else {
-              // Diğer dosyaları/klasörleri atla (örn: .js, .css, README)
-              return; 
-          }
+                        title = title.toUpperCase();
+                        
+                        // Özel Bilgi Kontrolü (Override)
+                        const lookupKey = sourceFolder === "Games" ? fileName : fileName;
+                        
+                        if (customGameDetails[lookupKey]) {
+                            const details = customGameDetails[lookupKey];
+                            title = details.title;
+                            desc = details.desc;
+                            level = details.level;
+                            if (details.badgeColor) {
+                                badgeStyle = `background: ${details.badgeColor};`;
+                            }
+                        }
 
-          // Varsayılan Değerler ve CSS Sınıfı
-          let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim();
-          let desc = "";
-          let level = "";
-          let badgeStyle = "background: #3498db;"; 
-          let cardClass = ""; 
+                        // HTML Kartını Oluştur
+                        const cardHTML = `
+                        <div class="game-card ${cardClass}">
+                            <span class="level-badge" style="${badgeStyle}">${level}</span>
+                            <h3>${title}</h3>
+                            <p>${desc}</p>
+                            <a href="${gameUrl}" class="play-btn">Play Now ➡️</a>
+                        </div>
+                        `;
+                        
+                        gamesGrid.innerHTML += cardHTML;
+                    });
 
-          if (sourceFolder === "Games") {
-              level = "Game";
-              desc = "An interactive game from the sub-directory.";
-              cardClass = "card-game";
-          } else if (sourceFolder === "Interactive_Activities") {
-              level = "Interactive Activity"; 
-              desc = "A reading or vocabulary practice session.";
-              cardClass = "card-activity"; 
-          }
+                    allContentContainer.appendChild(gamesGrid);
+                });
 
-          title = title.toUpperCase();
-          
-          // Özel Bilgi Kontrolü (Override)
-          // Not: Games için KLASÖR ADI (uzantısız), Activities için DOSYA ADI (uzantılı) kullanılır.
-          const lookupKey = sourceFolder === "Games" ? fileName : fileName;
-          
-          if (customGameDetails[lookupKey]) {
-              const details = customGameDetails[lookupKey];
-              title = details.title;
-              desc = details.desc;
-              level = details.level;
-              if (details.badgeColor) {
-                  badgeStyle = `background: ${details.badgeColor};`;
-              }
-          }
+            } catch (error) {
+                console.error('İçerikler yüklenirken hata oluştu:', error);
+                allContentContainer.innerHTML = `<p style="text-align:center; color:red; padding:20px;">İçerikler yüklenemedi: ${error.message || 'Bilinmeyen Hata'}. Lütfen tarayıcı Konsol sekmesini kontrol edin.</p>`;
+            }
+        }
 
-          // HTML Kartını Oluştur
-          const cardHTML = `
-          <div class="game-card ${cardClass}">
-              <span class="level-badge" style="${badgeStyle}">${level}</span>
-              <h3>${title}</h3>
-              <p>${desc}</p>
-              <a href="${gameUrl}" class="play-btn">Play Now ➡️</a>
-          </div>
-          `;
-          
-          gamesGrid.innerHTML += cardHTML;
-        });
-
-        allContentContainer.appendChild(gamesGrid);
-      });
-
-    } catch (error) {
-      console.error('İçerikler yüklenirken hata oluştu:', error);
-      allContentContainer.innerHTML = `<p style="text-align:center; color:red; padding:20px;">İçerikler yüklenemedi: ${error.message || 'Bilinmeyen Hata'}. Lütfen tarayıcı Konsol sekmesini kontrol edin.</p>`;
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', fetchAllContent);
-</script>
-
+        document.addEventListener('DOMContentLoaded', fetchAllContent);
+    </script>
 </body>
 </html>
-
