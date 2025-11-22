@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Getting Ready for a Safer Digital World – Interactive Reading & Questions (A2 Level)</title>
+  <style>
+    :root{
+      --bg-color:#1a1a2e;--primary-color:#16213e;--secondary-color:#0f3460;
+      --accent-color:#e94560;--accent-hover-color:#533483;--text-color:#f5f5f5;
+      --font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:var(--font-family);background:var(--bg-color);color:var(--text-color);
+      line-height:1.6;height:100vh;display:flex;flex-direction:column;overflow:hidden;
+      transition:background-color .3s,color .3s
+    }
+    header{
+      background:var(--primary-color);padding:15px 20px;display:flex;justify-content:space-between;
+      align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.3);z-index:100;min-height:70px
+    }
+    .title{font-size:22px;font-weight:700}
+    .controls{display:flex;gap:10px;align-items:center}
+    #themeSelector{
+      padding:8px 12px;border-radius:5px;border:1px solid var(--accent-color);
+      background:var(--secondary-color);color:var(--text-color);font-size:14px;cursor:pointer
+    }
+    .score-display{font-size:18px;font-weight:700;color:#f39c12;margin-right:10px}
+    button{
+      background:var(--secondary-color);color:#fff;border:none;padding:10px 18px;border-radius:6px;
+      cursor:pointer;font-size:16px;transition:background .3s;font-weight:500
+    }
+    button:hover{background:var(--accent-hover-color)}
+    main{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:20px;min-height:0}
+    .content-wrapper{display:flex;flex-direction:column;flex:1;min-height:0;gap:20px}
+    .reading{
+      background:var(--secondary-color);padding:25px;border-radius:10px;overflow-y:auto;
+      box-shadow:0 4px 8px rgba(0,0,0,.2);flex:1;min-height:0;display:flex;flex-direction:column
+    }
+    .reading-content{flex:1}
+    .reading p{margin-bottom:20px;font-size:20px;text-align:justify}
+    .highlight{background:var(--accent-color);padding:3px 6px;border-radius:4px;font-weight:700;animation:pulse 1s infinite}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+    .qbox{
+      background:var(--primary-color);padding:25px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,.2);
+      min-height:200px
+    }
+    .question{font-size:22px;margin-bottom:20px;font-weight:500}
+    .options{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px}
+    .option{
+      background:var(--secondary-color);padding:15px;border-radius:8px;cursor:pointer;transition:all .3s;
+      font-size:18px;border:2px solid transparent
+    }
+    .option:hover{background:var(--accent-hover-color);transform:translateY(-2px)}
+    .option.selected{background:var(--accent-hover-color);border-color:var(--accent-color)}
+    .answer{display:none;background:var(--accent-color);padding:15px;border-radius:8px;margin-top:15px;font-size:18px;font-weight:500}
+    .hint{display:none;background:var(--accent-hover-color);padding:15px;border-radius:8px;margin-top:15px;font-size:18px;font-weight:500;border-left:4px solid var(--accent-color)}
+    .button-group{display:flex;gap:10px;margin-top:15px}
+    input[type="text"],textarea{
+      width:100%;padding:15px;background:var(--secondary-color);color:var(--text-color);
+      border:2px solid var(--accent-hover-color);border-radius:8px;font-size:18px;margin-bottom:15px;transition:border-color .3s
+    }
+    input[type="text"]:focus,textarea:focus{outline:none;border-color:var(--accent-color)}
+    .vocab-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;padding:20px;overflow-y:auto;flex:1
+    }
+    .vocab-card{
+      background:var(--secondary-color);padding:20px;border-radius:10px;cursor:pointer;text-align:center;transition:all .3s;
+      min-height:120px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;border:2px solid transparent
+    }
+    .vocab-card:hover{transform:translateY(-5px);background:var(--accent-hover-color);border-color:var(--accent-color)}
+    .vocab-card.flipped{background:var(--accent-color);border-color:var(--text-color)}
+    .vocab-game-container{display:flex;flex:1;gap:30px;padding:20px;justify-content:center;align-items:flex-start}
+    .vocab-game-column{display:flex;flex-direction:column;gap:12px;width:45%}
+    .vocab-game-card{
+      background:var(--secondary-color);padding:15px;border-radius:10px;cursor:pointer;text-align:center;transition:all .3s;
+      font-size:18px;font-weight:500;border:3px solid transparent;user-select:none
+    }
+    .vocab-game-card:hover{transform:translateY(-3px);background:var(--accent-hover-color)}
+    .vocab-game-card.selected{border-color:#f39c12;background:var(--accent-hover-color);transform:scale(1.05)}
+    .vocab-game-card.matched{background:#27ae60;border-color:#2ecc71;cursor:default;transform:scale(1);animation:match-bounce .5s ease-out}
+    @keyframes match-bounce{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+    .vocab-game-card.incorrect{animation:shake .5s;background:#c0392b;border-color:#e74c3c}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+    .game-message{text-align:center;font-size:24px;font-weight:700;color:#2ecc71;margin-top:20px}
+    .game-controls{display:flex;justify-content:center;margin-top:20px}
+    nav{
+      display:flex;flex-direction:column;justify-content:center;align-items:center;padding:15px 20px;background:var(--primary-color);
+      box-shadow:0 -2px 10px rgba(0,0,0,.3);min-height:80px
+    }
+    .progress-container{width:100%;height:10px;background:var(--secondary-color);border-radius:5px;margin-bottom:10px;overflow:hidden}
+    .progress-bar{height:100%;width:0%;background:var(--accent-color);transition:width .3s ease-in-out}
+    .nav-buttons{display:flex;justify-content:space-between;width:100%}
+    #pageIndicator{font-size:18px;font-weight:500}
+    footer{background:var(--secondary-color);padding:12px;text-align:center;font-size:16px;font-weight:500}
+    .completion{display:none;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px}
+    .completion h1{font-size:56px;margin-bottom:30px;color:var(--accent-color)}
+    .completion p{font-size:28px;margin-bottom:40px}
+    .final-score{font-size:36px;color:#f39c12;margin-bottom:20px}
+    body.fullscreen-mode .reading p{font-size:25px}
+    body.fullscreen-mode .question{font-size:30px}
+    body.fullscreen-mode .option{font-size:20px;padding:15px}
+    body.fullscreen-mode input[type="text"],body.fullscreen-mode textarea{font-size:30px;padding:20px}
+    body.fullscreen-mode .answer,body.fullscreen-mode .hint{font-size:30px;padding:20px}
+    body.fullscreen-mode .vocab-card{font-size:18px;min-height:150px;padding:30px}
+    body.fullscreen-mode .vocab-game-card{font-size:16px;padding:18px}
+    body.fullscreen-mode .game-message{font-size:36px}
+    ::-webkit-scrollbar{width:10px}
+    ::-webkit-scrollbar-track{background:var(--primary-color)}
+    ::-webkit-scrollbar-thumb{background:var(--accent-hover-color);border-radius:5px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-color)}
+    body.theme-light{
+      --bg-color:#f5f5f5;--primary-color:#e0e0e0;--secondary-color:#ffffff;--accent-color:#3498db;
+      --accent-hover-color:#2980b9;--text-color:#333;--font-family:'Arial',sans-serif;
+    }
+    body.theme-nature{
+      --bg-color:#2c3e27;--primary-color:#3e4f37;--secondary-color:#4a6b49;--accent-color:#8bc34a;
+      --accent-hover-color:#7cb342;--text-color:#e8f5e9;--font-family:'Georgia',serif;
+    }
+    body.theme-tech{
+      --bg-color:#263238;--primary-color:#37474f;--secondary-color:#455a64;--accent-color:#00bcd4;
+      --accent-hover-color:#00acc1;--text-color:#eceff1;--font-family:'Roboto Mono',monospace;
+    }
+    .confetti{position:fixed;width:10px;height:10px;background:#f00;position:absolute;animation:confetti-fall 3s linear forwards}
+    @keyframes confetti-fall{to{transform:translateY(100vh) rotate(360deg);opacity:0}}
+  </style>
+</head>
+<body class="theme-tech">
+  <header>
+    <div class="title">9.3.R. Getting Ready for a Safer Digital World – Interactive Reading & Questions (A2 Level)</div>
+    <div class="controls">
+      <div class="score-display">Score: <span id="score">0</span></div>
+      <select id="themeSelector">
+        <option value="dark-blue">Dark Blue</option>
+        <option value="light">Light</option>
+        <option value="nature">Nature</option>
+        <option value="tech" selected>Tech</option>
+      </select>
+      <button id="readBtn">🔊 Read</button>
+      <button id="pauseBtn" style="display:none;">⏸️ Pause</button>
+      <button id="resumeBtn" style="display:none;">▶️ Resume</button>
+      <button id="stopBtn" style="display:none;">⏹️ Stop</button>
+      <button id="fullscreenBtn">⛶ Fullscreen</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="content-wrapper">
+      <div class="reading" id="reading">
+        <div class="reading-content" id="readingContent"></div>
+      </div>
+
+      <div class="qbox" id="qbox"></div>
+
+      <div class="vocab-grid" id="vocabGrid" style="display:none;"></div>
+
+      <div class="vocab-game-container" id="vocabGameContainer" style="display:none;"></div>
+
+      <div class="completion" id="completion">
+        <h1>🎉 You've completed all questions!</h1>
+        <div class="final-score">Your Final Score: <span id="finalScore">0</span></div>
+        <p>Great job on learning about Cybersecurity Education in Türkiye!</p>
+        <button id="restartBtn">🔄 Restart</button>
+      </div>
+    </div>
+  </main>
+
+  <nav>
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="nav-buttons">
+      <button id="prevBtn">⬅️ Previous</button>
+      <span id="pageIndicator">Page 1</span>
+      <button id="nextBtn">Next ➡️</button>
+    </div>
+  </nav>
+
+  <footer>Bu çalışma İngilizce Öğretmeni Abdullah AYDINHAN tarafından yapılmıştır.</footer>
+
+  <script>
+    /* ===== Content (PASSAGE) ===== */
+    const TOPIC = "Getting Ready for a Safer Digital World";
+    const LEVEL = "A2";
+
+    const PASSAGE = `
+    <p><strong>1</strong> The Internet is an important part of modern life. People can do many tasks without leaving their homes. For example, they can pay bills, order groceries, or buy travel tickets online. It also allows people to work from home, attend meetings, run their businesses, and study online. It is a great comfort to complete all these tasks quickly and easily and save time for spending time with family or relaxing.</p>
+
+    <p><strong>2</strong> However, when people are online, they often share personal information. This can bring risks such as cyberattacks and data theft. Hackers can steal this information and use it for bad purposes. They may also damage computer systems and cause serious problems in daily life. For this reason, countries need experts who can protect digital systems and keep data safe.</p>
+
+    <p><strong>3</strong> To meet this need, Türkiye now has many cybersecurity vocational schools to train future experts. They teach students to identify cyberthreats, prevent cyberattacks, and protect digital systems. As part of the education programme, cybersecurity vocational schools are located in technoparks—research and business centres where universities and companies work together. Students get real experience and learn more by working with professionals in these centres.</p>
+
+    <p><strong>4</strong> Many institutions need cybersecurity experts, so after graduation, students can easily find a job in various sectors such as private companies, government offices, banks, schools, hospitals, and cybersecurity firms.</p>
+
+    <p><strong>5</strong> Türkiye invests in this education to provide a safer digital environment for its citizens and businesses.</p>
+    `;
+
+    /* ===== Vocabulary (EN–TR) ~40 ===== */
+    const VOCAB_LIST = [
+      ["modern life","modern yaşam"],
+      ["pay bills","fatura ödemek"],
+      ["order groceries","market alışverişini sipariş etmek"],
+      ["travel tickets","seyahat biletleri"],
+      ["work from home","evden çalışmak"],
+      ["attend meetings","toplantılara katılmak"],
+      ["run a business","iş yürütmek"],
+      ["study online","çevrim içi eğitim görmek"],
+      ["save time","zaman kazanmak"],
+      ["relaxing","dinlenme"],
+      ["personal information","kişisel bilgi"],
+      ["cyberattack","siber saldırı"],
+      ["data theft","veri hırsızlığı"],
+      ["hacker","hacker/saldırgan"],
+      ["bad purposes (malicious)","kötü amaçlar"],
+      ["damage computer systems","bilgisayar sistemlerine zarar vermek"],
+      ["serious problems","ciddi sorunlar"],
+      ["expert","uzman"],
+      ["protect digital systems","dijital sistemleri korumak"],
+      ["keep data safe","veriyi güvende tutmak"],
+      ["cybersecurity","siber güvenlik"],
+      ["vocational school","meslek lisesi/okulu"],
+      ["train future experts","geleceğin uzmanlarını yetiştirmek"],
+      ["identify threats","tehditleri tespit etmek"],
+      ["prevent attacks","saldırıları önlemek"],
+      ["education programme","eğitim programı"],
+      ["technopark","teknopark"],
+      ["research and business centre","araştırma ve iş merkezi"],
+      ["universities and companies","üniversiteler ve şirketler"],
+      ["work together","birlikte çalışmak"],
+      ["real experience","gerçek deneyim"],
+      ["professionals","profesyoneller"],
+      ["institutions","kurumlar"],
+      ["government offices","kamu daireleri"],
+      ["private companies","özel şirketler"],
+      ["banks","bankalar"],
+      ["hospitals","hastaneler"],
+      ["cybersecurity firm","siber güvenlik firması"],
+      ["invest in education","eğitime yatırım yapmak"],
+      ["safer digital environment","daha güvenli dijital ortam"],
+      ["citizens","vatandaşlar"],
+      ["businesses","işletmeler"]
+    ];
+
+    /* ===== True/False (10) ===== */
+    const TF_QUESTIONS = [
+      { prompt:"People can complete many tasks online without leaving their homes.", answer:"True",
+        highlights:["People can do many tasks without leaving their homes"], hint:"See paragraph 1."},
+      { prompt:"The passage says the Internet only helps with entertainment, not with work or study.", answer:"False",
+        highlights:["work from home","attend meetings","run their businesses","study online"], hint:"Paragraph 1 lists several uses."},
+      { prompt:"Sharing personal information online can be risky.", answer:"True",
+        highlights:["they often share personal information","This can bring risks"], hint:"See paragraph 2."},
+      { prompt:"Hackers may use stolen information for helpful purposes.", answer:"False",
+        highlights:["use it for bad purposes"], hint:"Paragraph 2 clarifies intent."},
+      { prompt:"Countries need experts to protect digital systems and keep data safe.", answer:"True",
+        highlights:["countries need experts","protect digital systems","keep data safe"], hint:"Paragraph 2."},
+      { prompt:"Türkiye has no schools to train future cybersecurity experts.", answer:"False",
+        highlights:["Türkiye now has many cybersecurity vocational schools"], hint:"Paragraph 3."},
+      { prompt:"Technoparks are places where universities and companies cooperate.", answer:"True",
+        highlights:["technoparks—research and business centres where universities and companies work together"], hint:"Paragraph 3."},
+      { prompt:"Students do not gain real experience during their education.", answer:"False",
+        highlights:["Students get real experience"], hint:"Paragraph 3."},
+      { prompt:"Cybersecurity graduates can only work in banks.", answer:"False",
+        highlights:["private companies, government offices, banks, schools, hospitals, and cybersecurity firms"], hint:"Paragraph 4."},
+      { prompt:"Türkiye invests in cybersecurity education to create a safer digital environment.", answer:"True",
+        highlights:["Türkiye invests in this education to provide a safer digital environment"], hint:"Paragraph 5."}
+    ];
+
+    /* ===== MCQ (10) ===== */
+    const MCQ_QUESTIONS = [
+      {
+        prompt:"Which of the following is NOT listed as an online activity in the passage?",
+        options:["Paying bills","Ordering groceries","Climbing mountains","Buying travel tickets"],
+        answer:2,
+        highlights:["pay bills","order groceries","buy travel tickets"],
+        hint:"See the examples in paragraph 1."
+      },
+      {
+        prompt:"According to the passage, the Internet helps people to:",
+        options:["Only relax at home","Attend meetings and study online","Avoid sharing any personal information","Stop all cyberattacks"],
+        answer:1,
+        highlights:["attend meetings","study online"],
+        hint:"Paragraph 1."
+      },
+      {
+        prompt:"What is a possible risk when people share personal information online?",
+        options:["Free internet for all","Data theft","More family time","Cheaper groceries"],
+        answer:1,
+        highlights:["data theft"],
+        hint:"Paragraph 2."
+      },
+      {
+        prompt:"Why do countries need cybersecurity experts?",
+        options:[
+          "To build more supermarkets",
+          "To protect digital systems and keep data safe",
+          "To reduce internet speed",
+          "To stop universities from working with companies"
+        ],
+        answer:1,
+        highlights:["protect digital systems","keep data safe"],
+        hint:"Paragraph 2."
+      },
+      {
+        prompt:"Cybersecurity vocational schools in Türkiye:",
+        options:[
+          "Teach only theory without practice",
+          "Are located in technoparks to support cooperation",
+          "Do not allow students to meet professionals",
+          "Focus only on repairing hardware"
+        ],
+        answer:1,
+        highlights:["located in technoparks","work together","Students get real experience"],
+        hint:"Paragraph 3."
+      },
+      {
+        prompt:"In technoparks, universities and companies:",
+        options:["Work separately","Work together","Avoid research","Focus on sports events"],
+        answer:1,
+        highlights:["work together"],
+        hint:"Paragraph 3."
+      },
+      {
+        prompt:"After graduation, students can find jobs in:",
+        options:[
+          "Only banks",
+          "Various sectors including government offices and hospitals",
+          "Only foreign countries",
+          "Only their own startups"
+        ],
+        answer:1,
+        highlights:["private companies, government offices, banks, schools, hospitals, and cybersecurity firms"],
+        hint:"Paragraph 4."
+      },
+      {
+        prompt:"The main goal of Türkiye’s investment in cybersecurity education is to:",
+        options:[
+          "Increase movie streaming",
+          "Provide a safer digital environment",
+          "Close technoparks",
+          "Stop online shopping"
+        ],
+        answer:1,
+        highlights:["provide a safer digital environment"],
+        hint:"Paragraph 5."
+      },
+      {
+        prompt:"Which phrase best describes the education approach mentioned?",
+        options:[
+          "Only exams and lectures",
+          "Project-based learning in sports",
+          "Practical experience with professionals",
+          "No contact with industry"
+        ],
+        answer:2,
+        highlights:["Students get real experience","working with professionals"],
+        hint:"Paragraph 3."
+      },
+      {
+        prompt:"Which set lists three different online actions from the passage?",
+        options:[
+          "Pay bills, order groceries, buy travel tickets",
+          "Cook meals, wash clothes, paint walls",
+          "Drive cars, fix roads, visit parks",
+          "Plant trees, play football, watch birds"
+        ],
+        answer:0,
+        highlights:["pay bills","order groceries","buy travel tickets"],
+        hint:"Paragraph 1."
+      }
+    ];
+
+    /* ===== Fill-in-the-Blank (10) ===== */
+    const FILL_QUESTIONS = [
+      { prompt:"People can pay ______ online and save time.", answer:"bills",
+        highlights:["pay bills"], hint:"Paragraph 1."},
+      { prompt:"The passage says people can ______ meetings online.", answer:"attend",
+        highlights:["attend meetings"], hint:"Paragraph 1."},
+      { prompt:"Sharing personal ______ online can bring risks.", answer:"information",
+        highlights:["share personal information"], hint:"Paragraph 2."},
+      { prompt:"Hackers can steal data and use it for ______ purposes.", answer:"bad",
+        highlights:["use it for bad purposes"], hint:"Paragraph 2."},
+      { prompt:"Countries need experts to protect ______ systems.", answer:"digital",
+        highlights:["protect digital systems"], hint:"Paragraph 2."},
+      { prompt:"Türkiye has many cybersecurity ______ schools.", answer:"vocational",
+        highlights:["cybersecurity vocational schools"], hint:"Paragraph 3."},
+      { prompt:"These schools teach students to ______ cyberattacks.", answer:"prevent",
+        highlights:["prevent cyberattacks"], hint:"Paragraph 3."},
+      { prompt:"Schools are located in ______ where universities and companies work together.", answer:"technoparks",
+        highlights:["located in technoparks","work together"], hint:"Paragraph 3."},
+      { prompt:"After graduation, students can find jobs in many ______.", answer:"sectors",
+        highlights:["various sectors"], hint:"Paragraph 4."},
+      { prompt:"Türkiye invests in education to provide a ______ digital environment.", answer:"safer",
+        highlights:["provide a safer digital environment"], hint:"Paragraph 5."}
+    ];
+
+    /* ===== Open-ended (10) ===== */
+    const OPEN_QUESTIONS = [
+      {
+        prompt:"List at least three tasks people can do online according to the passage.",
+        model:"People can pay bills, order groceries, buy travel tickets, work from home, attend meetings, run their businesses, and study online.",
+        highlights:["pay bills","order groceries","buy travel tickets","work from home","attend meetings","run their businesses","study online"],
+        hint:"See paragraph 1."
+      },
+      {
+        prompt:"Why is sharing personal information online risky?",
+        model:"Because it can lead to cyberattacks and data theft; hackers may steal information and use it for bad purposes.",
+        highlights:["cyberattacks","data theft","use it for bad purposes"],
+        hint:"Paragraph 2."
+      },
+      {
+        prompt:"What kinds of experts do countries need and why?",
+        model:"They need cybersecurity experts to protect digital systems and keep data safe.",
+        highlights:["experts","protect digital systems","keep data safe"],
+        hint:"Paragraph 2."
+      },
+      {
+        prompt:"What do cybersecurity vocational schools in Türkiye teach?",
+        model:"They teach students to identify cyberthreats, prevent cyberattacks, and protect digital systems.",
+        highlights:["identify cyberthreats","prevent cyberattacks","protect digital systems"],
+        hint:"Paragraph 3."
+      },
+      {
+        prompt:"What are technoparks and what happens there?",
+        model:"Technoparks are research and business centres where universities and companies work together; students gain real experience with professionals.",
+        highlights:["technoparks—research and business centres","work together","real experience","professionals"],
+        hint:"Paragraph 3."
+      },
+      {
+        prompt:"Name at least four sectors where graduates can work.",
+        model:"Private companies, government offices, banks, schools, hospitals, and cybersecurity firms.",
+        highlights:["private companies","government offices","banks","schools","hospitals","cybersecurity firms"],
+        hint:"Paragraph 4."
+      },
+      {
+        prompt:"What is the purpose of Türkiye’s investment in cybersecurity education?",
+        model:"To provide a safer digital environment for citizens and businesses.",
+        highlights:["provide a safer digital environment","citizens and businesses"],
+        hint:"Paragraph 5."
+      },
+      {
+        prompt:"How does online work and study save time for people?",
+        model:"They can complete tasks quickly and easily at home and spend the saved time with family or relaxing.",
+        highlights:["quickly and easily","save time","spending time with family or relaxing"],
+        hint:"Paragraph 1."
+      },
+      {
+        prompt:"Give two examples of how hackers can negatively affect daily life.",
+        model:"They can steal personal data for bad purposes and damage computer systems, causing serious problems.",
+        highlights:["steal this information","bad purposes","damage computer systems","serious problems"],
+        hint:"Paragraph 2."
+      },
+      {
+        prompt:"Explain how students benefit from being in technoparks during their education.",
+        model:"They work with professionals, gain real experience, and learn more through cooperation between universities and companies.",
+        highlights:["work together","real experience","professionals"],
+        hint:"Paragraph 3."
+      }
+    ];
+
+    /* ===== State ===== */
+    let currentSlide = 0;
+    let totalSlides = 3 + TF_QUESTIONS.length + MCQ_QUESTIONS.length + FILL_QUESTIONS.length + OPEN_QUESTIONS.length + 1;
+    let speechSynthesisObj = window.speechSynthesis;
+    let speechUtterance = null;
+    let isReading = false, isPaused = false;
+    let currentQuestionText = "";
+    let score = 0;
+
+    // Vocab Game
+    let selectedEnglishCard = null;
+    let matchedPairs = new Set();
+    let turkishCardsMap = new Map();
+    let usedVocabIndices = new Set();
+    let currentVocabGameWords = [];
+
+    // DOM
+    const readingDiv = document.getElementById('reading');
+    const readingContentDiv = document.getElementById('readingContent');
+    const qboxDiv = document.getElementById('qbox');
+    const vocabGridDiv = document.getElementById('vocabGrid');
+    const vocabGameContainerDiv = document.getElementById('vocabGameContainer');
+    const completionDiv = document.getElementById('completion');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+    const readBtn = document.getElementById('readBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const themeSelector = document.getElementById('themeSelector');
+    const scoreDisplay = document.getElementById('score');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const progressBar = document.getElementById('progressBar');
+
+    // Sounds (simple beeps)
+    const correctSound = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT";
+    const wrongSound  = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT";
+    const winSound    = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT";
+
+    function playSound(data){ const a=new Audio(data); a.volume=0.3; a.play().catch(()=>{}); }
+
+    /* Theme (default Tech) */
+    const THEMES = { 'dark-blue':'theme-dark-blue','light':'theme-light','nature':'theme-nature','tech':'theme-tech' };
+    function applyTheme(name){ document.body.className = THEMES[name] || ''; localStorage.setItem('selectedTheme', name); }
+    function initTheme(){
+      const saved = localStorage.getItem('selectedTheme');
+      if(saved){ themeSelector.value = saved; applyTheme(saved); }
+      else { themeSelector.value = 'tech'; applyTheme('tech'); } // default Tech
+      themeSelector.addEventListener('change', e => applyTheme(e.target.value));
+    }
+
+    function updateProgressBar(){
+      const progress = (currentSlide / (totalSlides - 1)) * 100;
+      progressBar.style.width = progress + '%';
+    }
+
+    function init(){
+      showSlide(currentSlide);
+      setupEventListeners();
+      initTheme();
+      setupFullscreenListener();
+      updateProgressBar();
+    }
+
+    function setupEventListeners(){
+      prevBtn.addEventListener('click', ()=>{ if(currentSlide>0){ currentSlide--; showSlide(currentSlide); }});
+      nextBtn.addEventListener('click', ()=>{ if(currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide); }});
+      readBtn.addEventListener('click', startReading);
+      pauseBtn.addEventListener('click', pauseReading);
+      resumeBtn.addEventListener('click', resumeReading);
+      stopBtn.addEventListener('click', stopReading);
+      fullscreenBtn.addEventListener('click', toggleFullscreen);
+      restartBtn.addEventListener('click', ()=>{ score=0; scoreDisplay.textContent=score; currentSlide=0; showSlide(currentSlide); });
+      document.addEventListener('keydown',(e)=>{
+        if(e.key==='ArrowLeft'&&currentSlide>0){ currentSlide--; showSlide(currentSlide); }
+        else if(e.key==='ArrowRight'&&currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide); }
+        else if(e.key.toLowerCase()==='f'){ toggleFullscreen(); }
+      });
+    }
+
+    function setupFullscreenListener(){
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    }
+    function handleFullscreenChange(){
+      if(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement){
+        document.body.classList.add('fullscreen-mode');
+      } else { document.body.classList.remove('fullscreen-mode'); }
+    }
+
+    function showSlide(i){
+      readingDiv.style.display='none'; qboxDiv.style.display='none'; vocabGridDiv.style.display='none';
+      vocabGameContainerDiv.style.display='none'; completionDiv.style.display='none';
+      stopReading();
+      pageIndicator.textContent = 'Page ' + (i+1);
+      updateProgressBar();
+
+      if(i===0){
+        vocabGridDiv.style.display='grid'; showVocabulary();
+      } else if(i===1){
+        vocabGameContainerDiv.style.display='flex'; showVocabGame();
+      } else if(i===2){
+        readingDiv.style.display='block'; qboxDiv.style.display='none'; readingContentDiv.innerHTML = PASSAGE;
+      } else if(i===totalSlides-1){
+        completionDiv.style.display='flex'; document.getElementById('finalScore').textContent = score; launchConfetti(); playSound(winSound);
+      } else {
+        readingDiv.style.display='block'; qboxDiv.style.display='block'; readingContentDiv.innerHTML = PASSAGE;
+        const qIndex = i - 3;
+        if(qIndex < TF_QUESTIONS.length){
+          showTFQuestion(TF_QUESTIONS[qIndex]);
+        } else if(qIndex < TF_QUESTIONS.length + MCQ_QUESTIONS.length){
+          const idx = qIndex - TF_QUESTIONS.length; showMCQQuestion(MCQ_QUESTIONS[idx]);
+        } else if(qIndex < TF_QUESTIONS.length + MCQ_QUESTIONS.length + FILL_QUESTIONS.length){
+          const idx = qIndex - TF_QUESTIONS.length - MCQ_QUESTIONS.length; showFillQuestion(FILL_QUESTIONS[idx]);
+        } else {
+          const idx = qIndex - TF_QUESTIONS.length - MCQ_QUESTIONS.length - FILL_QUESTIONS.length; showOpenQuestion(OPEN_QUESTIONS[idx]);
+        }
+      }
+    }
+
+    function showVocabulary(){
+      vocabGridDiv.innerHTML='';
+      VOCAB_LIST.forEach(([en,tr])=>{
+        const card = document.createElement('div');
+        card.className='vocab-card'; card.textContent=en;
+        card.addEventListener('click',function(){
+          if(!this.classList.contains('flipped')){ this.classList.add('flipped'); this.textContent=tr; }
+          else { this.classList.remove('flipped'); this.textContent=en; }
+        });
+        vocabGridDiv.appendChild(card);
+      });
+    }
+
+    function getRandomVocabWords(count){
+      const available=[];
+      for(let i=0;i<VOCAB_LIST.length;i++){ if(!usedVocabIndices.has(i)) available.push(i); }
+      if(available.length===0){ usedVocabIndices.clear(); for(let i=0;i<VOCAB_LIST.length;i++) available.push(i); }
+      const actual=Math.min(count,available.length);
+      const pick=[]; for(let i=0;i<actual;i++){ const r=Math.floor(Math.random()*available.length); const idx=available[r]; pick.push(idx); usedVocabIndices.add(idx); available.splice(r,1); }
+      return pick.map(i=>VOCAB_LIST[i]);
+    }
+
+    function showVocabGame(){
+      selectedEnglishCard=null; matchedPairs.clear(); turkishCardsMap.clear();
+      currentVocabGameWords = getRandomVocabWords(10);
+      vocabGameContainerDiv.innerHTML="";
+
+      const colEN=document.createElement('div'); colEN.className='vocab-game-column';
+      const colTR=document.createElement('div'); colTR.className='vocab-game-column';
+
+      currentVocabGameWords.forEach((pair,idx)=>{
+        const c=document.createElement('div'); c.className='vocab-game-card'; c.textContent=pair[0];
+        c.dataset.index=idx; c.dataset.type='english'; c.addEventListener('click',handleCardClick); colEN.appendChild(c);
+      });
+
+      const shuffled=currentVocabGameWords.map((p,idx)=>({word:p[1],originalIndex:idx})).sort(()=>Math.random()-0.5);
+      shuffled.forEach(it=>{
+        const c=document.createElement('div'); c.className='vocab-game-card'; c.textContent=it.word;
+        c.dataset.index=it.originalIndex; c.dataset.type='turkish'; c.addEventListener('click',handleCardClick);
+        turkishCardsMap.set(c,it.originalIndex); colTR.appendChild(c);
+      });
+
+      vocabGameContainerDiv.appendChild(colEN); vocabGameContainerDiv.appendChild(colTR);
+    }
+
+    function handleCardClick(e){
+      const card=e.target; const type=card.dataset.type; const index=parseInt(card.dataset.index);
+      if(matchedPairs.has(index)) return;
+
+      if(type==='english'){
+        if(selectedEnglishCard) selectedEnglishCard.classList.remove('selected');
+        card.classList.add('selected'); selectedEnglishCard=card;
+      }else if(type==='turkish'){
+        if(!selectedEnglishCard) return;
+        const enIndex=parseInt(selectedEnglishCard.dataset.index);
+        if(enIndex===index){
+          card.classList.add('matched'); selectedEnglishCard.classList.add('matched'); matchedPairs.add(index);
+          score+=10; scoreDisplay.textContent=score; playSound(correctSound);
+          selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+          if(matchedPairs.size===currentVocabGameWords.length){
+            setTimeout(()=>{
+              vocabGameContainerDiv.innerHTML=`
+                <div class="game-message">🎉 Congratulations! You've matched all the words!</div>
+                <div class="game-controls"><button id="playAgainBtn">🔄 Play Again</button></div>`;
+              playSound(winSound);
+              document.getElementById('playAgainBtn').addEventListener('click',showVocabGame);
+            },500);
+          }
+        } else {
+          card.classList.add('incorrect'); selectedEnglishCard.classList.add('incorrect'); playSound(wrongSound);
+          setTimeout(()=>{
+            card.classList.remove('incorrect'); selectedEnglishCard.classList.remove('incorrect');
+            selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+          },800);
+        }
+      }
+    }
+
+    function showTFQuestion(q){
+      currentQuestionText=q.prompt;
+      qboxDiv.innerHTML=`
+        <div class="question">${q.prompt}</div>
+        <div class="options">
+          <div class="option" data-value="True">True</div>
+          <div class="option" data-value="False">False</div>
+        </div>
+        <div class="button-group">
+          <button id="showAnswerBtn">💡 Show Answer</button>
+          <button id="showHintBtn">💬 Hint</button>
+        </div>
+        <div class="answer" id="answerDiv"></div>
+        <div class="hint" id="hintDiv"></div>
+      `;
+      const opts=document.querySelectorAll('.option');
+      opts.forEach(o=>o.addEventListener('click',function(){opts.forEach(x=>x.classList.remove('selected'));this.classList.add('selected');}));
+      document.getElementById('showAnswerBtn').addEventListener('click',()=>{const a=document.getElementById('answerDiv');a.textContent='Answer: '+q.answer;a.style.display='block';highlightText(q.highlights);playSound(correctSound);});
+      document.getElementById('showHintBtn').addEventListener('click',()=>{const h=document.getElementById('hintDiv');h.textContent='💡 Hint: '+q.hint;h.style.display='block';});
+    }
+
+    function showMCQQuestion(q){
+      currentQuestionText=q.prompt;
+      let optionsHTML=''; q.options.forEach((op,idx)=>{optionsHTML+=`<div class="option" data-value="${idx}">${op}</div>`;});
+      qboxDiv.innerHTML=`
+        <div class="question">${q.prompt}</div>
+        <div class="options">${optionsHTML}</div>
+        <div class="button-group">
+          <button id="showAnswerBtn">💡 Show Answer</button>
+          <button id="showHintBtn">💬 Hint</button>
+        </div>
+        <div class="answer" id="answerDiv"></div>
+        <div class="hint" id="hintDiv"></div>
+      `;
+      const opts=document.querySelectorAll('.option');
+      opts.forEach(o=>o.addEventListener('click',function(){opts.forEach(x=>x.classList.remove('selected'));this.classList.add('selected');}));
+      document.getElementById('showAnswerBtn').addEventListener('click',()=>{const a=document.getElementById('answerDiv');a.textContent='Answer: '+q.options[q.answer];a.style.display='block';highlightText(q.highlights);playSound(correctSound);});
+      document.getElementById('showHintBtn').addEventListener('click',()=>{const h=document.getElementById('hintDiv');h.textContent='💡 Hint: '+q.hint;h.style.display='block';});
+    }
+
+    function showFillQuestion(q){
+      currentQuestionText=q.prompt;
+      qboxDiv.innerHTML=`
+        <div class="question">${q.prompt}</div>
+        <input type="text" id="fillAnswer" placeholder="Type your answer here">
+        <div class="button-group">
+          <button id="showAnswerBtn">💡 Show Answer</button>
+          <button id="showHintBtn">💬 Hint</button>
+        </div>
+        <div class="answer" id="answerDiv"></div>
+        <div class="hint" id="hintDiv"></div>
+      `;
+      document.getElementById('showAnswerBtn').addEventListener('click',()=>{const a=document.getElementById('answerDiv');a.textContent='Answer: '+q.answer;a.style.display='block';highlightText(q.highlights);playSound(correctSound);});
+      document.getElementById('showHintBtn').addEventListener('click',()=>{const h=document.getElementById('hintDiv');h.textContent='💡 Hint: '+q.hint;h.style.display='block';});
+    }
+
+    function showOpenQuestion(q){
+      currentQuestionText=q.prompt;
+      qboxDiv.innerHTML=`
+        <div class="question">${q.prompt}</div>
+        <textarea id="openAnswer" rows="4" placeholder="Type your answer here"></textarea>
+        <div class="button-group">
+          <button id="showAnswerBtn">💡 Show Model Answer</button>
+          <button id="showHintBtn">💬 Hint</button>
+        </div>
+        <div class="answer" id="answerDiv"></div>
+        <div class="hint" id="hintDiv"></div>
+      `;
+      document.getElementById('showAnswerBtn').addEventListener('click',()=>{const a=document.getElementById('answerDiv');a.textContent='Model Answer: '+q.model;a.style.display='block';highlightText(q.highlights);playSound(correctSound);});
+      document.getElementById('showHintBtn').addEventListener('click',()=>{const h=document.getElementById('hintDiv');h.textContent='💡 Hint: '+q.hint;h.style.display='block';});
+    }
+
+    function highlightText(highlights){
+      let html = PASSAGE;
+      highlights.forEach(ph=>{
+        const esc = ph.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        const re = new RegExp('('+esc+')','gi');
+        html = html.replace(re,'<span class="highlight">$1</span>');
+      });
+      readingContentDiv.innerHTML = html;
+    }
+
+    function startReading(){
+      if(isReading && !isPaused) return;
+      if(isPaused){ resumeReading(); return; }
+      let textToRead = (currentSlide>=3 && currentSlide<totalSlides-1) ? currentQuestionText : readingContentDiv.innerText;
+      speechUtterance = new SpeechSynthesisUtterance(textToRead);
+      speechUtterance.lang='en-US'; speechUtterance.rate=0.9;
+      speechUtterance.onend=()=>{ stopReading(); };
+      speechSynthesisObj.speak(speechUtterance);
+      isReading=true; isPaused=false;
+      readBtn.style.display='none'; pauseBtn.style.display='inline-block'; stopBtn.style.display='inline-block';
+    }
+    function pauseReading(){ if(!isReading||isPaused) return; speechSynthesisObj.pause(); isPaused=true; pauseBtn.style.display='none'; resumeBtn.style.display='inline-block'; }
+    function resumeReading(){ if(!isReading||!isPaused) return; speechSynthesisObj.resume(); isPaused=false; resumeBtn.style.display='none'; pauseBtn.style.display='inline-block'; }
+    function stopReading(){
+      if(!isReading) return; speechSynthesisObj.cancel(); isReading=false; isPaused=false;
+      readBtn.style.display='inline-block'; pauseBtn.style.display='none'; resumeBtn.style.display='none'; stopBtn.style.display='none';
+    }
+
+    function toggleFullscreen(){
+      if(!document.fullscreenElement){ document.documentElement.requestFullscreen().catch(()=>{}); }
+      else { document.exitFullscreen(); }
+    }
+
+    function launchConfetti(){
+      const colors=['#e94560','#f39c12','#2ecc71','#3498db','#9b59b6']; const N=100;
+      for(let i=0;i<N;i++){
+        setTimeout(()=>{
+          const c=document.createElement('div'); c.className='confetti';
+          c.style.left=(Math.random()*100)+'%'; c.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+          c.style.animationDuration=(Math.random()*2+2)+'s'; document.body.appendChild(c);
+          setTimeout(()=>c.remove(),4000);
+        }, i*30);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{ readingContentDiv.innerHTML = PASSAGE; init(); });
+  </script>
+</body>
+</html>
