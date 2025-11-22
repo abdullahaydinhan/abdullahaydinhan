@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Süleyman the Magnificent - Interactive Learning</title>
+<style>
+  :root{
+    --bg-color:#0f1b2d; --primary-color:#15223a; --secondary-color:#103257;
+    --accent-color:#ff4d6d; --accent-hover-color:#4d3e7a; --text-color:#f5f5f5;
+    --font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:var(--font-family); background:var(--bg-color); color:var(--text-color);
+    line-height:1.6; height:100vh; display:flex; flex-direction:column; overflow:hidden;
+  }
+  header{
+    background:var(--primary-color); padding:15px 20px; display:flex; justify-content:space-between; align-items:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.3); min-height:70px;
+  }
+  .title{font-size:24px; font-weight:800}
+  .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  select{
+    padding:8px 12px; border-radius:8px; border:1px solid var(--accent-color);
+    background:var(--secondary-color); color:var(--text-color); font-size:14px; cursor:pointer;
+  }
+  .score-display{font-size:18px; font-weight:700; color:#f39c12; margin-right:8px}
+  button{
+    background:var(--secondary-color); color:#fff; border:none; padding:10px 16px; border-radius:10px; cursor:pointer;
+    font-size:16px; font-weight:600; transition:background-color .25s,transform .05s ease;
+  }
+  button:hover{background:var(--accent-hover-color)}
+  main{flex:1; display:flex; flex-direction:column; overflow:hidden; padding:20px; min-height:0}
+  .content-wrapper{display:flex; flex-direction:column; flex:1; min-height:0; gap:20px}
+  .reading{
+    background:var(--secondary-color); padding:24px; border-radius:14px; overflow-y:auto;
+    box-shadow:0 4px 10px rgba(0,0,0,.25); flex:1; min-height:0; display:flex; flex-direction:column
+  }
+  .reading h2{margin-bottom:12px}
+  .reading p{margin-bottom:20px; font-size:20px; text-align:justify}
+  .highlight{
+    background:var(--accent-color);
+    color:#fff;
+    padding:2px 6px;
+    border-radius:6px;
+    font-weight:800;
+    outline:3px solid rgba(255,255,255,.25);
+    box-shadow:0 0 0 3px rgba(255,77,109,.35);
+  }
+  .qbox{background:var(--primary-color); padding:24px; border-radius:14px; box-shadow:0 4px 10px rgba(0,0,0,.25)}
+  .question{font-size:22px; margin-bottom:18px; font-weight:700}
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px}
+  .option{background:var(--secondary-color); padding:14px; border-radius:12px; cursor:pointer; transition:all .2s; font-size:18px; border:2px solid transparent; text-align:center}
+  .option:hover{background:var(--accent-hover-color); transform:translateY(-1px)}
+  .option.selected{background:var(--accent-hover-color); border-color:var(--accent-color)}
+  .answer{display:none; background:#27ae60; padding:12px; border-radius:10px; margin-top:12px; font-size:18px; font-weight:700}
+  .hint{display:none; background:#34495e; padding:12px; border-radius:10px; margin-top:12px; font-size:18px; font-weight:600; border-left:4px solid var(--accent-color)}
+  .button-group{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap}
+  input[type="text"],textarea{
+    width:100%; padding:14px; background:var(--secondary-color); color:var(--text-color);
+    border:2px solid var(--accent-hover-color); border-radius:10px; font-size:18px; margin-bottom:10px;
+  }
+  input[type="text"]:focus,textarea:focus{outline:none; border-color:var(--accent-color)}
+  .vocab-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; padding:10px; overflow-y:auto; flex:1}
+  .vocab-card{
+    background:var(--secondary-color); padding:18px; border-radius:12px; cursor:pointer; text-align:center;
+    transition:all .2s; min-height:110px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; border:2px solid transparent
+  }
+  .vocab-card:hover{transform:translateY(-3px); background:var(--accent-hover-color); border-color:var(--accent-color)}
+  .vocab-card.flipped{background:var(--accent-color); border-color:#fff}
+  .vocab-game-container{display:flex; flex:1; gap:24px; padding:10px; justify-content:center; align-items:flex-start}
+  .vocab-game-column{display:flex; flex-direction:column; gap:10px; width:45%}
+  .vocab-game-card{
+    background:var(--secondary-color); padding:14px; border-radius:12px; cursor:pointer; text-align:center;
+    transition:all .2s; font-size:18px; font-weight:700; border:3px solid transparent; user-select:none
+  }
+  .vocab-game-card:hover{transform:translateY(-2px); background:var(--accent-hover-color)}
+  .vocab-game-card.selected{border-color:#f39c12; background:var(--accent-hover-color); transform:scale(1.03)}
+  .vocab-game-card.matched{background:#27ae60; border-color:#2ecc71; cursor:default; transform:scale(1)}
+  .vocab-game-card.incorrect{animation:shake .4s; background:#c0392b; border-color:#e74c3c}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  nav{display:flex; flex-direction:column; justify-content:center; align-items:center; padding:14px 20px; background:var(--primary-color); box-shadow:0 -2px 10px rgba(0,0,0,.3); min-height:80px}
+  .progress-container{width:100%; height:10px; background:var(--secondary-color); border-radius:6px; margin-bottom:10px; overflow:hidden}
+  .progress-bar{height:100%; width:0%; background:var(--accent-color); transition:width .25s ease-in-out}
+  .nav-buttons{display:flex; justify-content:space-between; width:100%}
+  #pageIndicator{font-size:18px; font-weight:700}
+  footer{background:var(--secondary-color); padding:12px; text-align:center; font-size:16px; font-weight:600}
+  .completion{display:none; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding:30px}
+  .completion h1{font-size:48px; margin-bottom:20px; color:var(--accent-color)}
+  .completion p{font-size:24px; margin-bottom:24px}
+  .final-score{font-size:32px; color:#f39c12; margin-bottom:16px}
+  body.fullscreen-mode .reading p{font-size:24px}
+  body.fullscreen-mode .question{font-size:28px}
+  body.fullscreen-mode .option{font-size:20px; padding:16px}
+  body.fullscreen-mode input[type="text"],body.fullscreen-mode textarea{font-size:26px; padding:18px}
+  body.fullscreen-mode .answer,body.fullscreen-mode .hint{font-size:24px; padding:16px}
+  body.theme-light{--bg-color:#f5f5f5;--primary-color:#e0e0e0;--secondary-color:#ffffff;--accent-color:#3498db;--accent-hover-color:#2980b9;--text-color:#333}
+  body.theme-nature{--bg-color:#2c3e27;--primary-color:#3e4f37;--secondary-color:#4a6b49;--accent-color:#8bc34a;--accent-hover-color:#7cb342;--text-color:#e8f5e9}
+  body.theme-tech{--bg-color:#263238;--primary-color:#37474f;--secondary-color:#455a64;--accent-color:#00bcd4;--accent-hover-color:#00acc1;--text-color:#eceff1}
+</style>
+</head>
+<body>
+<header>
+  <div class="title">Süleyman the Magnificent</div>
+  <div class="controls">
+    <div class="score-display">Score: <span id="score">0</span></div>
+    <select id="themeSelector" title="Theme">
+      <option value="dark-blue" selected>Dark Blue</option>
+      <option value="light">Light</option>
+      <option value="nature">Nature</option>
+      <option value="tech">Tech</option>
+    </select>
+    <select id="voiceSelector" title="Voice Type">
+      <option value="female" selected>US Female</option>
+      <option value="male">US Male</option>
+    </select>
+    <button id="readBtn">🔊 Read</button>
+    <button id="pauseBtn" style="display:none;">⏸️ Pause</button>
+    <button id="resumeBtn" style="display:none;">▶️ Resume</button>
+    <button id="stopBtn" style="display:none;">⏹️ Stop</button>
+    <button id="fullscreenBtn">⛶ Fullscreen</button>
+  </div>
+</header>
+
+<main>
+  <div class="content-wrapper">
+    <div class="reading" id="reading">
+      <div class="reading-content" id="readingContent"></div>
+    </div>
+
+    <div class="qbox" id="qbox"></div>
+
+    <div class="vocab-grid" id="vocabGrid" style="display:none;"></div>
+    <div class="vocab-game-container" id="vocabGameContainer" style="display:none;"></div>
+
+    <div class="completion" id="completion">
+      <h1>🎉 You've completed all questions!</h1>
+      <div class="final-score">Your Final Score: <span id="finalScore">0</span></div>
+      <p>Great job!</p>
+      <button id="restartBtn">🔄 Restart</button>
+    </div>
+  </div>
+</main>
+
+<nav>
+  <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="nav-buttons">
+    <button id="prevBtn">⬅️ Previous</button>
+    <span id="pageIndicator">Page 1</span>
+    <button id="nextBtn">Next ➡️</button>
+  </div>
+</nav>
+
+<footer>Ottoman History Learning Application</footer>
+
+<script>
+/* =========================
+   CONTENT (Süleyman the Magnificent)
+   ========================= */
+const TOPIC = "Süleyman the Magnificent";
+const LEVEL = "A2–B1";
+
+/* Reading passage (your text) */
+const PASSAGE = `
+<h2 style="margin-bottom:12px">Süleyman the Magnificent</h2>
+<p>Süleyman was born on 27th April 1495 in Trabzon. His father was Sultan Selim I and his mother was Hafsa Sultan. He became the 10th sultan of the State in 1520. People called him "Kanuni", meaning "Lawgiver", in his homeland because he was a fair sultan, but Europeans always called him "Süleyman the Magnificent". During his period, first, he captured Belgrade in 1521 and Rhodes in 1522, then, he killed King Lewis of Hungary at Mohacs in 1526 and won a victory. He unsuccessfully surrounded Vienna in 1529, but he captured Transylvania in 1562. Finally, he conquered lands of Egypt and Persia and announced war on the coasts of North Africa, Italy and Dalmatia under the command of Admiral Barbarossa. Süleyman the Magnificent ruled the Ottoman Empire between 1520 – 1566. Architect Mimar Sinan built many valuable buildings in this period and those buildings survived until our days. Some dams, fountains, madrasas, caravanserais, Turkish baths, botanical gardens and bridges were restored. The port of Golden Horn became one of the busiest ports then. Süleymaniye, Şehzadebaşı, Sultan Selim and Cihangir Mosques are some of the important monuments of this period. When Süleyman I died in 1566, the Ottoman State was a world power.</p>
+`;
+
+/* Vocabulary list (~40, tap-to-flip) */
+const VOCAB_LIST = [
+  ["sultan","sultan"],
+  ["magnificent","müthişiş"],
+  ["born","doğdu"],
+  ["Trabzon","Trabzon"],
+  ["father","baba"],
+  ["mother","anne"],
+  ["captured","fethetti"],
+  ["Belgrade","Belgrad"],
+  ["Rhodes","Rodos"],
+  ["killed","öldürdü"],
+  ["victory","zafer"],
+  ["surrounded","kuşattı"],
+  ["Vienna","Viyana"],
+  ["Transylvania","Erdel"],
+  ["conquered","fethetti"],
+  ["Egypt","Mısır"],
+  ["Persia","İran"],
+  ["war","savaş"],
+  ["coasts","kıyılar"],
+  ["North Africa","Kuzey Afrika"],
+  ["Italy","İtalya"],
+  ["Dalmatia","Dalmaçya"],
+  ["Admiral","amiral"],
+  ["command","komuta"],
+  ["ruled","hüküm sürdü"],
+  ["Ottoman Empire","Osmanlı İmparatorluğu"],
+  ["architect","mimar"],
+  ["Mimar Sinan","Mimar Sinan"],
+  ["buildings","binalar"],
+  ["dams","barajlar"],
+  ["fountains","çeşmeler"],
+  ["madrasas","medreseler"],
+  ["caravanserais","kervansaraylar"],
+  ["Turkish baths","Türk hamamları"],
+  ["botanical gardens","botanik bahçeler"],
+  ["bridges","köprüler"],
+  ["restored","restore edildi"],
+  ["port of Golden Horn","Altın Boynaz Limanı"],
+  ["busiest ports","en yoğun limanlar"],
+  ["Süleymaniye","Süleymaniye"],
+  ["Şehzadebaşı","Şehzadebaşı"],
+  ["mosques","camiler"],
+  ["monuments","anıtlar"],
+  ["died","öldü"],
+  ["world power","dünya gücü"]
+];
+
+/* True/False (10) */
+const TF_QUESTIONS = [
+  { prompt:"Süleyman was born in Istanbul.",
+    answer:"False",
+    highlights:["Süleyman was born on 27th April 1495 in Trabzon"],
+    hint:"Birthplace information (Paragraph 1)."},
+  { prompt:"Süleyman's father was named Murat.",
+    answer:"False",
+    highlights:["His father was Sultan Selim I"],
+    hint:"Family information (Paragraph 1)."},
+  { prompt:"Süleyman became sultan in 1520.",
+    answer:"True",
+    highlights:["He became the 10th sultan of the State in 1520"],
+    hint:"Accession information (Paragraph 1)."},
+  { prompt:"Süleyman captured Belgrade in 1521.",
+    answer:"True",
+    highlights:["he captured Belgrade in 1521"],
+    hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Süleyman captured Rhodes in 1522.",
+    answer:"True",
+    highlights:["and Rhodes in 1522"],
+    hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Süleyman killed King Lewis of Hungary at Mohacs in 1526.",
+    answer:"True",
+    highlights:["he killed King Lewis of Hungary at Mohacs in 1526"],
+    hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Süleyman successfully surrounded Vienna in 1529.",
+    answer:"False",
+    highlights:["He unsuccessfully surrounded Vienna in 1529"],
+    hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Süleyman captured Transylvania in 1562.",
+    answer:"True",
+    highlights:["he captured Transylvania in 1562"],
+    hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Süleyman conquered lands in Egypt and Persia.",
+    answer:"True",
+    highlights:["he conquered lands of Egypt and Persia"],
+    hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Süleyman died in 1566.",
+    answer:"True",
+    highlights:["When Süleyman I died in 1566"],
+    hint:"Death information (Paragraph 1)."}
+];
+
+/* Multiple Choice (10) */
+const MCQ_QUESTIONS = [
+  { prompt:"Where was Süleyman born?",
+    options:["Istanbul","Ankara","Trabzon","Bursa"],
+    answer:2, highlights:["Süleyman was born on 27th April 1495 in Trabzon"], hint:"Birthplace information (Paragraph 1)."},
+  { prompt:"Who was Süleyman's father?",
+    options:["Murat I","Mehmet II","Bayezid II","Selim I"],
+    answer:2, highlights:["His father was Sultan Selim I"], hint:"Family information (Paragraph 1)."},
+  { prompt:"When did Süleyman become sultan?",
+    options:["1515","1518","1520","1525"],
+    answer:2, highlights:["He became the 10th sultan of the State in 1520"], hint:"Accession information (Paragraph 1)."},
+  { prompt:"What city did Süleyman capture in 1521?",
+    options:["Budapest","Belgrade","Vienna","Rhodes"],
+    answer:1, highlights:["he captured Belgrade in 1521"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"What island did Süleyman capture in 1522?",
+    options:["Cyprus","Crete","Rhodes","Malta"],
+    answer:2, highlights:["and Rhodes in 1522"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Who did Süleyman defeat at the Battle of Mohacs?",
+    options:["King Ferdinand I","King Charles V","King Francis I","King Lewis of Hungary"],
+    answer:3, highlights:["he killed King Lewis of Hungary at Mohacs in 1526"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"What did Süleyman do to Vienna in 1529?",
+    options:["Successfully captured it","Burned it","Surrounded it","Unsuccessfully surrounded it"],
+    answer:3, highlights:["He unsuccessfully surrounded Vienna in 1529"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"What region did Süleyman capture in 1562?",
+    options:["Wallachia","Moldavia","Transylvania","Bulgaria"],
+    answer:2, highlights:["he captured Transylvania in 1562"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"What countries did Süleyman conquer?",
+    options:["Hungary and Poland","Egypt and Persia","Greece and Bulgaria","Italy and Dalmatia"],
+    answer:1, highlights:["he conquered lands of Egypt and Persia"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"When did Süleyman die?",
+    options:["1560","1562","1566","1574"],
+    answer:2, highlights:["When Süleyman I died in 1566"], hint:"Death information (Paragraph 1)."}
+];
+
+/* Fill-in-the-Blank (10) */
+const FILL_QUESTIONS = [
+  { prompt:"Süleyman was born on 27th April ______.", answer:"1495",
+    highlights:["Süleyman was born on 27th April 1495 in Trabzon"], hint:"Birth date (Paragraph 1)."},
+  { prompt:"His father was Sultan ______ I.", answer:"Selim",
+    highlights:["His father was Sultan Selim I"], hint:"Family information (Paragraph 1)."},
+  { prompt:"He became the ______ sultan of the State in 1520.", answer:"10th",
+    highlights:["He became the 10th sultan of the State in 1520"], hint:"Accession information (Paragraph 1)."},
+  { prompt:"He captured ______ in 1521.", answer:"Belgrade",
+    highlights:["he captured Belgrade in 1521"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"He captured the island of ______ in 1522.", answer:"Rhodes",
+    highlights:["and Rhodes in 1522"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"He killed King ______ of Hungary at Mohacs.", answer:"Lewis",
+    highlights:["he killed King Lewis of Hungary at Mohacs in 1526"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"He unsuccessfully surrounded ______ in 1529.", answer:"Vienna",
+    highlights:["He unsuccessfully surrounded Vienna in 1529"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"He captured ______ in 1562.", answer:"Transylvania",
+    highlights:["he captured Transylvania in 1562"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"He conquered lands of ______ and Persia.", answer:"Egypt",
+    highlights:["he conquered lands of Egypt and Persia"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Süleyman died in ______.", answer:"1566",
+    highlights:["When Süleyman I died in 1566"], hint:"Death information (Paragraph 1)."}
+];
+
+/* Open-Ended (10) */
+const OPEN_QUESTIONS = [
+  { prompt:"Describe Süleyman's family background.",
+    model:"Süleyman was born to Sultan Selim I and Hafsa Sultan. His father was Sultan Selim I, who ruled the Ottoman Empire before him.",
+    highlights:["His father was Sultan Selim I","His mother was Hafsa Sultan"], hint:"Family information (Paragraph 1)."},
+  { prompt:"Explain the significance of Süleyman becoming sultan in 1520.",
+    model:"Süleyman became the 10th sultan of the Ottoman Empire in 1520, which was a significant position in the imperial succession system.",
+    highlights:["He became the 10th sultan of the State in 1520"], hint:"Accession information (Paragraph 1)."},
+  { prompt:"Detail Süleyman's military campaigns in Europe.",
+    model:"Süleyman led several military campaigns in Europe, including the capture of Belgrade (1521), Rhodes (1522), and the victory at Mohacs against Hungary (1526). He attempted to capture Vienna but was unsuccessful.",
+    highlights:["he captured Belgrade in 1521","he killed King Lewis of Hungary at Mohacs in 1526","He unsuccessfully surrounded Vienna in 1529"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"What was the outcome of the Battle of Mohacs?",
+    model:"The Battle of Mohacs in 1526 resulted in a decisive Ottoman victory. King Lewis of Hungary was killed, and the Hungarian army was defeated.",
+    highlights:["he killed King Lewis of Hungary at Mohacs in 1526","and won a victory"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Why was Süleyman's attempt to capture Vienna unsuccessful?",
+    model:"Süleyman's attempt to capture Vienna in 1529 failed due to logistical problems and the approaching winter, forcing him to withdraw.",
+    highlights:["He unsuccessfully surrounded Vienna in 1529"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"What territories did Süleyman add to the Ottoman Empire?",
+    model:"Süleyman expanded Ottoman territories through conquests in Europe, Asia, and Africa. He captured Belgrade, Rhodes, Transylvania, and conquered lands in Egypt and Persia.",
+    highlights:["he captured Belgrade in 1521","and Rhodes in 1522","he captured Transylvania in 1562","he conquered lands of Egypt and Persia"], hint:"Military campaigns (Paragraph 1)."},
+  { prompt:"Describe the architectural achievements during Süleyman's reign.",
+    model:"During Süleyman's reign, Architect Mimar Sinan built many significant structures including mosques, bridges, and public buildings. Many of these structures still stand today as examples of Ottoman architecture.",
+    highlights:["Architect Mimar Sinan built many valuable buildings","Süleymaniye, Şehzadebaşı, Sultan Selim and Cihangir Mosques"], hint:"Architectural achievements (Paragraph 1)."},
+  { prompt:"How did Süleyman impact trade and commerce in the Ottoman Empire?",
+    model:"Süleyman improved trade routes and developed the port of Golden Horn into one of the busiest ports in the region, boosting commerce and economic prosperity.",
+    highlights:["The port of Golden Horn became one of the busiest ports then"], hint:"Economic impact (Paragraph 1)."},
+  { prompt:"What was the political situation in Europe when Süleyman died?",
+    model:"When Süleyman died in 1566, the Ottoman Empire was at the height of its power as a world state, but succession issues would soon create challenges.",
+    highlights:["When Süleyman I died in 1566, the Ottoman State was a world power"], hint:"Death and legacy (Paragraph 1)."},
+  { prompt:"Evaluate Süleyman's legacy as a ruler.",
+    model:"Süleyman is remembered as one of the greatest Ottoman sultans, known for his military conquests, architectural patronage, and legal reforms. His reign marked the golden age of the Ottoman Empire.",
+    highlights:["Süleyman the Magnificent ruled the Ottoman Empire between 1520 – 1566","Architect Mimar Sinan built many valuable buildings"], hint:"Legacy (Paragraph 1)."}
+];
+
+/* =========================
+   STATE & DOM
+   ========================= */
+let currentSlide = 0;
+let totalSlides = 3 + TF_QUESTIONS.length + MCQ_QUESTIONS.length + FILL_QUESTIONS.length + OPEN_QUESTIONS.length + 1;
+let speechSynthesisObj = window.speechSynthesis;
+let speechUtterance = null;
+let isReading = false, isPaused = false;
+let currentQuestionText = "";
+let score = 0;
+
+let activeHighlights = [];
+
+const readingDiv = document.getElementById('reading');
+const readingContentDiv = document.getElementById('readingContent');
+const qboxDiv = document.getElementById('qbox');
+const vocabGridDiv = document.getElementById('vocabGrid');
+const vocabGameContainerDiv = document.getElementById('vocabGameContainer');
+const completionDiv = document.getElementById('completion');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const pageIndicator = document.getElementById('pageIndicator');
+const readBtn = document.getElementById('readBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+const stopBtn = document.getElementById('stopBtn');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const restartBtn = document.getElementById('restartBtn');
+const themeSelector = document.getElementById('themeSelector');
+const voiceSelector = document.getElementById('voiceSelector');
+const scoreDisplay = document.getElementById('score');
+const finalScoreDisplay = document.getElementById('finalScore');
+const progressBar = document.getElementById('progressBar');
+
+/* Themes */
+const THEMES={'dark-blue':'theme-dark-blue','light':'theme-light','nature':'theme-nature','tech':'theme-tech'};
+function applyTheme(name){document.body.className=THEMES[name]||'';localStorage.setItem('selectedTheme',name)}
+function initTheme(){
+  const saved=localStorage.getItem('selectedTheme');
+  if(saved){themeSelector.value=saved;applyTheme(saved)}
+  themeSelector.addEventListener('change',e=>applyTheme(e.target.value))
+}
+
+/* Progress bar */
+function updateProgressBar(){
+  const progress=(currentSlide/(totalSlides-1))*100;
+  progressBar.style.width=`${progress}%`;
+}
+
+/* INIT */
+function init(){
+  showSlide(currentSlide);
+  setupEventListeners();
+  initTheme();
+  setupFullscreenListener();
+  updateProgressBar();
+  initVoices();
+}
+
+/* Listeners */
+function setupEventListeners(){
+  prevBtn.addEventListener('click',()=>{ if(currentSlide>0){ currentSlide--; showSlide(currentSlide);} });
+  nextBtn.addEventListener('click',()=>{ if(currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide);} });
+  readBtn.addEventListener('click',startReading);
+  pauseBtn.addEventListener('click',pauseReading);
+  resumeBtn.addEventListener('click',resumeReading);
+  stopBtn.addEventListener('click',stopReading);
+  fullscreenBtn.addEventListener('click',toggleFullscreen);
+  restartBtn.addEventListener('click',()=>{ score=0; scoreDisplay.textContent=score; currentSlide=0; showSlide(currentSlide); });
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowLeft'&&currentSlide>0){ currentSlide--; showSlide(currentSlide); }
+    else if(e.key==='ArrowRight'&&currentSlide<totalSlides-1){ currentSlide++; showSlide(currentSlide); }
+    else if(e.key.toLowerCase()==='f'){ toggleFullscreen(); }
+  });
+
+  const savedVoice=localStorage.getItem('voicePref');
+  if(savedVoice){ voiceSelector.value=savedVoice; }
+  voiceSelector.addEventListener('change',()=>localStorage.setItem('voicePref',voiceSelector.value));
+}
+
+/* Fullscreen */
+function setupFullscreenListener(){
+  document.addEventListener('fullscreenchange',handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange',handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange',handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange',handleFullscreenChange);
+}
+function handleFullscreenChange(){
+  if(document.fullscreenElement||document.webkitFullscreenElement||document.mozFullScreenElement||document.msFullscreenElement){
+    document.body.classList.add('fullscreen-mode');
+  }else{
+    document.body.classList.remove('fullscreen-mode');
+  }
+}
+
+/* Slides */
+function showSlide(slideIndex){
+  readingDiv.style.display='none';
+  qboxDiv.style.display='none';
+  vocabGridDiv.style.display='none';
+  vocabGameContainerDiv.style.display='none';
+  completionDiv.style.display='none';
+
+  stopReading();
+  activeHighlights = [];
+  readingContentDiv.innerHTML = PASSAGE;
+
+  pageIndicator.textContent=`Page ${slideIndex+1}`;
+  updateProgressBar();
+
+  if(slideIndex===0){
+    vocabGridDiv.style.display='grid';
+    showVocabulary();
+  }else if(slideIndex===1){
+    vocabGameContainerDiv.style.display='flex';
+    showVocabGame();
+  }else if(slideIndex===2){
+    readingDiv.style.display='block';
+  }else if(slideIndex===totalSlides-1){
+    completionDiv.style.display='flex';
+    finalScoreDisplay.textContent=score;
+  }else{
+    readingDiv.style.display='block';
+    qboxDiv.style.display='block';
+
+    const questionIndex=slideIndex-3;
+    if(questionIndex<TF_QUESTIONS.length){
+      showTFQuestion(TF_QUESTIONS[questionIndex]);
+    }else if(questionIndex<TF_QUESTIONS.length+MCQ_QUESTIONS.length){
+      const mcqIndex=questionIndex-TF_QUESTIONS.length;
+      showMCQQuestion(MCQ_QUESTIONS[mcqIndex]);
+    }else if(questionIndex<TF_QUESTIONS.length+MCQ_QUESTIONS.length+FILL_QUESTIONS.length){
+      const fillIndex=questionIndex-TF_QUESTIONS.length-MCQ_QUESTIONS.length;
+      showFillQuestion(FILL_QUESTIONS[fillIndex]);
+    }else{
+      const openIndex=questionIndex-TF_QUESTIONS.length-MCQ_QUESTIONS.length-FILL_QUESTIONS.length;
+      showOpenQuestion(OPEN_QUESTIONS[openIndex]);
+    }
+  }
+}
+
+/* Vocab Cards */
+function showVocabulary(){
+  vocabGridDiv.innerHTML='';
+  VOCAB_LIST.forEach(([en,tr])=>{
+    const card=document.createElement('div');
+    card.className='vocab-card'; card.textContent=en;
+    card.addEventListener('click',function(){
+      if(!this.classList.contains('flipped')){ this.classList.add('flipped'); this.textContent=tr; }
+      else{ this.classList.remove('flipped'); this.textContent=en; }
+    });
+    vocabGridDiv.appendChild(card);
+  });
+}
+
+/* Vocab Matching Game */
+let selectedEnglishCard=null, matchedPairs=new Set(), usedVocabIndices=new Set(), currentVocabGameWords=[];
+function getRandomVocabWords(count){
+  const available=[]; for(let i=0;i<VOCAB_LIST.length;i++) if(!usedVocabIndices.has(i)) available.push(i);
+  if(available.length===0){ usedVocabIndices.clear(); for(let i=0;i<VOCAB_LIST.length;i++) available.push(i); }
+  const actual=Math.min(count,available.length); const selected=[];
+  for(let i=0;i<actual;i++){ const idx=Math.floor(Math.random()*available.length); const pick=available[idx]; selected.push(pick); usedVocabIndices.add(pick); available.splice(idx,1); }
+  return selected.map(i=>VOCAB_LIST[i]);
+}
+function showVocabGame(){
+  selectedEnglishCard=null; matchedPairs.clear();
+  currentVocabGameWords=getRandomVocabWords(10);
+  vocabGameContainerDiv.innerHTML="";
+  const englishColumn=document.createElement('div'); englishColumn.className='vocab-game-column';
+  const turkishColumn=document.createElement('div'); turkishColumn.className='vocab-game-column';
+
+  currentVocabGameWords.forEach((pair,index)=>{
+    const card=document.createElement('div'); card.className='vocab-game-card'; card.textContent=pair[0];
+    card.dataset.index=index; card.dataset.type='english'; card.addEventListener('click',handleCardClick);
+    englishColumn.appendChild(card);
+  });
+
+  const shuffled=currentVocabGameWords.map((p,idx)=>({word:p[1],originalIndex:idx})).sort(()=>Math.random()-0.5);
+  shuffled.forEach(item=>{
+    const card=document.createElement('div'); card.className='vocab-game-card'; card.textContent=item.word;
+    card.dataset.index=item.originalIndex; card.dataset.type='turkish'; card.addEventListener('click',handleCardClick);
+    turkishColumn.appendChild(card);
+  });
+
+  vocabGameContainerDiv.appendChild(englishColumn);
+  vocabGameContainerDiv.appendChild(turkishColumn);
+}
+function handleCardClick(e){
+  const card=e.target; const type=card.dataset.type; const index=parseInt(card.dataset.index);
+  if(matchedPairs.has(index)) return;
+  if(type==='english'){
+    if(selectedEnglishCard) selectedEnglishCard.classList.remove('selected');
+    card.classList.add('selected'); selectedEnglishCard=card;
+  }else if(type==='turkish'){
+    if(!selectedEnglishCard) return;
+    const englishIndex=parseInt(selectedEnglishCard.dataset.index);
+    if(englishIndex===index){
+      card.classList.add('matched'); selectedEnglishCard.classList.add('matched'); matchedPairs.add(index);
+      score+=10; scoreDisplay.textContent=score;
+      selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+      if(matchedPairs.size===currentVocabGameWords.length){
+        setTimeout(()=>{
+          vocabGameContainerDiv.innerHTML=`<div class="game-message">🎉 All matched!</div>
+          <div class="game-controls"><button id="playAgainBtn">🔄 Play Again</button></div>`;
+          document.getElementById('playAgainBtn').addEventListener('click',showVocabGame);
+        },400);
+      }
+    }else{
+      card.classList.add('incorrect'); selectedEnglishCard.classList.add('incorrect');
+      setTimeout(()=>{
+        card.classList.remove('incorrect'); selectedEnglishCard.classList.remove('incorrect'); selectedEnglishCard.classList.remove('selected'); selectedEnglishCard=null;
+      },700);
+    }
+  }
+}
+
+/* ===== Question Renders (Show Answer -> addHighlights from PASSAGE) ===== */
+function showTFQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <div class="options">
+      <div class="option" data-value="True">True</div>
+      <div class="option" data-value="False">False</div>
+    </div>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.querySelectorAll('.option').forEach(opt=>opt.addEventListener('click',function(){document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected');}));
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.answer}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showMCQQuestion(q){
+  currentQuestionText=q.prompt;
+  let optionsHTML=''; q.options.forEach((opt,idx)=>optionsHTML+=`<div class="option" data-value="${idx}">${opt}</div>`);
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <div class="options">${optionsHTML}</div>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.querySelectorAll('.option').forEach(opt=>opt.addEventListener('click',function(){document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected')); this.classList.add('selected');}));
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.options[q.answer]}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showFillQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <input type="text" id="fillAnswer" placeholder="Type your answer here"/>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Answer: ${q.answer}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+function showOpenQuestion(q){
+  currentQuestionText=q.prompt;
+  qboxDiv.innerHTML=`
+    <div class="question">${q.prompt}</div>
+    <textarea id="openAnswer" placeholder="Type your answer here" rows="4"></textarea>
+    <div class="button-group">
+      <button id="showAnswerBtn">💡 Show Model Answer</button>
+      <button id="showHintBtn">💬 Hint</button>
+    </div>
+    <div class="answer" id="answerDiv"></div>
+    <div class="hint" id="hintDiv"></div>
+  `;
+  const answerDiv=document.getElementById('answerDiv');
+  const hintDiv=document.getElementById('hintDiv');
+  document.getElementById('showAnswerBtn').addEventListener('click',()=>{
+    answerDiv.textContent=`Model Answer: ${q.model}`; answerDiv.style.display='block';
+    addHighlights(q.highlights);
+  });
+  document.getElementById('showHintBtn').addEventListener('click',()=>{ hintDiv.textContent=`💡 Hint: ${q.hint}`; hintDiv.style.display='block'; });
+}
+
+/* ===== Sally-Style Highlight (ROBUST FINAL VERSION) ===== */
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function addHighlights(phrases){
+  let html = PASSAGE;
+  const sorted = [...phrases].filter(Boolean).sort((a, b) => b.length - a.length);
+
+  sorted.forEach(phrase => {
+    // This function builds a highly flexible regex pattern from a phrase.
+    const buildPattern = (p) => {
+      const parts = p.split(/\s+/); // Split phrase into words/parts
+      const regexParts = parts.map(part => {
+        // Handle the ellipsis wildcard
+        if (part === '...') {
+          return '[\\s\\S]*?'; // Match any non-greedy sequence of non-whitespace characters
+        }
+        // For other words, escape them and allow for optional HTML tags/whitespace
+        return `${escapeRegExp(part)}(?:<[^>]*>)?\\s*`;
+      });
+      return regexParts.join('');
+    };
+
+    const finalPattern = buildPattern(phrase);
+    const rx = new RegExp(`(${finalPattern})`, 'gi');
+    html = html.replace(rx, '<span class="highlight">$1</span>');
+  });
+
+  readingContentDiv.innerHTML = html;
+
+  const first = readingContentDiv.querySelector('.highlight');
+  if(first){
+    first.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+/* TTS */
+let cachedVoices=[];
+function initVoices(){
+  function load(){ cachedVoices=speechSynthesis.getVoices(); }
+  load();
+  if(typeof speechSynthesis!=="undefined"){ speechSynthesis.onvoiceschanged=load; }
+}
+function pickEnUSVoice(preferMale=false){
+  const enUS=cachedVoices.filter(v=>/en[-_]?US/i.test(v.lang||"")||/English \(United States\)/i.test(v.name||""));
+  const femaleHints=["Female","Aria","Jenny","Samantha","Zira","Google US English","Ana"];
+  const maleHints=["Male","Guy","David","Mark","Christopher","Eric","John"];
+  const hints=preferMale?maleHints:femaleHints;
+  const hit=enUS.find(v=>hints.some(h=>(v.name||"").toLowerCase().includes(h.toLowerCase())));
+  if(hit) return hit;
+  if(enUS.length) return enUS[0];
+  const enAny=cachedVoices.filter(v=>/^en/i.test(v.lang||""));
+  if(enAny.length) return enAny[0];
+  return null;
+}
+function startReading(){
+  if(isReading&&!isPaused) return;
+  if(isPaused){ resumeReading(); return; }
+  let textToRead="";
+  if(currentSlide>=3&&currentSlide<totalSlides-1) textToRead=currentQuestionText;
+  else textToRead=readingContentDiv.innerText;
+  speechUtterance=new SpeechSynthesisUtterance(textToRead);
+  const preferMale=(voiceSelector.value==='male');
+  const voice=pickEnUSVoice(preferMale); if(voice) speechUtterance.voice=voice;
+  speechUtterance.lang='en-US'; speechUtterance.rate=.95;
+  speechUtterance.onend=()=>{ stopReading(); };
+  speechSynthesisObj.speak(speechUtterance);
+  isReading=true; isPaused=false;
+  readBtn.style.display='none'; pauseBtn.style.display='inline-block'; stopBtn.style.display='inline-block';
+}
+function pauseReading(){ if(!isReading||isPaused) return; speechSynthesisObj.pause(); isPaused=true; pauseBtn.style.display='none'; resumeBtn.style.display='inline-block';}
+function resumeReading(){ if(!isReading||!isPaused) return; speechSynthesisObj.resume(); isPaused=false; resumeBtn.style.display='none'; pauseBtn.style.display='inline-block';}
+function stopReading(){
+  if(!isReading) return;
+  speechSynthesisObj.cancel(); isReading=false; isPaused=false;
+  readBtn.style.display='inline-block'; pauseBtn.style.display='none'; resumeBtn.style.display='none'; stopBtn.style.display='none';
+}
+
+/* Fullscreen */
+function toggleFullscreen(){ if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{}); else document.exitFullscreen(); }
+
+/* Start */
+document.addEventListener('DOMContentLoaded',()=>{ readingContentDiv.innerHTML=PASSAGE; init(); });
+</script>
+</body>
+</html>
