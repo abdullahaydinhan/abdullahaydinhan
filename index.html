@@ -155,22 +155,29 @@
     const GRADE_LEVELS = ["9TH_GRADE", "10TH_GRADE", "11TH_GRADE", "12TH_GRADE"]; 
     
     const allContentContainer = document.getElementById('all-content-container');
-    const navLinks = document.querySelectorAll('#navbar a[data-filter]');
+    
+    // YENİ: Sadece filtreleme linklerini seçmek için
+    const filterNavLinks = document.querySelectorAll('#navbar a[data-filter]'); 
+    const allNavLinks = document.querySelectorAll('#navbar a'); // TÜM linkleri seçmek için
 
     // Tüm İçerikleri Tutacak Global Değişken
     let globalAllData = [];
 
-    // --- ÖZEL OYUN BİLGİLERİ (Kart Başlıklarını Düzenlemek İçin) ---
-    // Lütfen buradaki anahtarları GitHub'daki gerçek dosya/klasör adlarıyla eşleştirin.
+    // --- ÖZEL OYUN BİLGİLERİ ---
+    // Games klasörüne ait özel tanımı kaldırdım. Artık Milyoner varsayılan "Games" başlığını alacak.
     const customGameDetails = {
         // Interactive Activities (TAM DOSYA ADI)
         "9.1.R. Land of Fire PAGE 30.html": { title: "Land of Fire Reading (Page 30)", level: "Azerbaijan Activity", desc: "Azerbaycan okuma anlama pratiği.", badgeColor: "#f39c12" },
         "9.1.R. Getting Ready for a Safer Digital World Page 34.html": { title: "Safer Digital World (Page 34)", level: "Cybersecurity Quiz", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
         "9.1.R. Somewhere Far Away PAGE 32.html": { title: "Somewhere Far Away Reading", level: "Chile Activity", desc: "Şili ile ilgili okuma ve anlama pratiği.", badgeColor: "#00b894" },
         
-        // Games (KLASÖR ADI uzantısız)
-        "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Knowledge Quiz", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
-        "Simple_Vocabulary_Quiz": { title: "Simple Vocab Quiz", level: "Quick Test", desc: "Temel kelime testi.", badgeColor: "#3498db" }
+        // Games (KLASÖR ADI uzantısız) - Milyoner ve Simple Vocab QUIZ tanımı silindi/düzenlendi.
+        // Artık Games klasöründeki tüm oyunlar varsayılan 'Games' başlığını alacak.
+        
+        /* Örnek olarak Milyonerin özel başlığını kaldırdık, sadece aktivite başlıkları kaldı.
+        "Milyoner9_1": { title: "9. Sınıf Milyoner Oyunu", level: "Games", desc: "Genel İngilizce bilgi yarışması.", badgeColor: "#27ae60" },
+        "Simple_Vocabulary_Quiz": { title: "Simple Vocab Quiz", level: "Games", desc: "Temel kelime testi.", badgeColor: "#3498db" }
+        */
     };
 
     /**
@@ -210,7 +217,6 @@
             const results = await Promise.all(fetchPromises);
             globalAllData = results.flat(); 
             
-            // Başlangıçta 'All' (Tüm içerikleri) göster
             displayContent('All'); 
 
         } catch (error) {
@@ -229,7 +235,7 @@
         const contentHeader = document.querySelector('#all-content-container h2');
         let displayData = globalAllData;
 
-        // Başlık güncellemeleri
+        // Başlık ve Filtreleme
         if (filterSource === 'Games') {
             mainTitle.textContent = "Welcome to Your Game Hub!";
             contentHeader.textContent = "🎮 Games by Grade Level";
@@ -244,7 +250,7 @@
         }
         
         allContentContainer.innerHTML = '';
-        allContentContainer.appendChild(contentHeader); // Ana başlığı tekrar ekle
+        allContentContainer.appendChild(contentHeader);
 
         if (displayData.length === 0 && filterSource !== 'All') {
             allContentContainer.innerHTML += `<p style="text-align:center; color:#999; padding:20px;">Bu kategoride henüz listelenecek içerik bulunamadı.</p>`;
@@ -264,7 +270,7 @@
         GRADE_LEVELS.forEach(grade => {
             const gradeItems = groupedData[grade];
             
-            // İSTEK 4: Veri yoksa sınıf başlığını LİSTELEME
+            // Veri yoksa sınıf başlığını LİSTELEME
             if (!gradeItems || gradeItems.length === 0) return; 
 
             // Sınıf Başlığını Oluştur
@@ -282,17 +288,17 @@
                 let gameUrl = "";
                 let sourceFolder = item.sourceFolder;
                 
-                // URL belirleme ve Filtreleme (Sadece dir/html)
+                // URL belirleme ve Filtreleme
                 if (sourceFolder === "Games" && item.type === 'dir') {
                     gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}/index.html`;
                 } 
                 else if (sourceFolder === "Interactive_Activities" && item.type === 'file' && fileName.endsWith('.html')) {
                     gameUrl = `https://${username}.github.io/${repo}/${sourceFolder}/${item.gradeFolder}/${fileName}`;
                 } else {
-                    return; // Liste dışı kalanları atla
+                    return;
                 }
 
-                // Varsayılan Değerler ve İSTEK 2-3 (Varsayılan Rozet Başlıkları)
+                // Varsayılan Değerler ve Rozet Başlıkları
                 let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim();
                 let desc = "";
                 let level = "";
@@ -300,11 +306,11 @@
                 let cardClass = ""; 
 
                 if (sourceFolder === "Games") {
-                    level = "Games"; // İSTEK 2: Games klasöründeki varsayılan başlık
+                    level = "Games"; // Games klasöründeki varsayılan başlık
                     desc = "An interactive game from the sub-directory.";
                     cardClass = "card-game";
                 } else if (sourceFolder === "Interactive_Activities") {
-                    level = "Interactive Activities"; // İSTEK 3: Activities klasöründeki varsayılan başlık
+                    level = "Interactive Activities"; // Activities klasöründeki varsayılan başlık
                     desc = "A reading or vocabulary practice session.";
                     cardClass = "card-activity"; 
                 }
@@ -321,7 +327,8 @@
                     const details = customGameDetails[lookupKey];
                     title = details.title;
                     desc = details.desc;
-                    level = details.level; // Custom level kullanılır
+                    // level bilgisi custom'dan alınırsa kullanılır
+                    level = details.level || level; 
                     if (details.badgeColor) {
                         badgeStyle = `background: ${details.badgeColor};`;
                     }
@@ -346,28 +353,35 @@
 
     // --- OLAY DİNLEYİCİLERİ ---
     
-    // Navigasyon tıklamalarını yönetme
-    navLinks.forEach(link => {
+    // Filtreleme navigasyon tıklamalarını yönetme
+    filterNavLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // Tüm aktif sınıfları kaldır
-            document.querySelectorAll('#navbar a').forEach(nav => nav.classList.remove('active-link'));
+            // SADECE filtreleme linklerinden aktif sınıfı kaldır
+            filterNavLinks.forEach(nav => nav.classList.remove('active-link'));
             
-            // Tıklananı aktif yap
+            // Tıklanan filtreleme linkini aktif yap
             e.target.classList.add('active-link');
 
             const filter = e.target.getAttribute('data-filter');
-            
-            // Filtre varsa içeriği göster, yoksa (Home butonu) All içeriğini göster
             displayContent(filter || 'All');
         });
+    });
+
+    // Sayfa Dışındaki Linkler (About/Contact) için özel işlem:
+    // Bu linkler tıklandığında aktif sınıfın kaybolması engellenir.
+    allNavLinks.forEach(link => {
+        if (!link.hasAttribute('data-filter')) {
+            link.addEventListener('click', () => {
+                // Filtreleme butonlarının aktif sınıfı sabit kalır.
+            });
+        }
     });
 
     // Sayfa yüklendiğinde tüm içerikleri çek ve varsayılan olarak All'u göster
     document.addEventListener('DOMContentLoaded', () => {
         loadAllContent();
-        // Sayfa yüklendiğinde Home butonunu aktif yapar (varsayılan 'All')
         document.getElementById('nav-home').classList.add('active-link');
     });
 </script>
