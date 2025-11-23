@@ -5,6 +5,7 @@ on:
     paths:
       - 'Games/**'
       - 'Interactive_Activities/**'
+      - 'Vocabulary/**'  # Yeni klasör eklendi
   workflow_dispatch:
 
 jobs:
@@ -15,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Generate JSON (Strict Categories)
+    - name: Generate JSON with MULTI-FILE Support
       uses: actions/github-script@v6
       with:
         script: |
@@ -24,12 +25,13 @@ jobs:
 
           const gamesDir = 'Games';
           const activitiesDir = 'Interactive_Activities';
+          const vocabDir = 'Vocabulary'; // Yeni Bölüm
           const outputFile = 'games_data.json';
           
           let results = [];
           let existingData = {};
 
-          // --- HAFIZA: ESKİ VERİLERİ OKU ---
+          // --- HAFIZA OKUMA ---
           if (fs.existsSync(outputFile)) {
             try {
               const rawData = fs.readFileSync(outputFile, 'utf8');
@@ -41,28 +43,31 @@ jobs:
           function createEntry(realPath, name, defaultGrade, defaultSource) {
              const old = existingData[realPath];
              
-             // BAŞLIK DÜZELTME: Admin başlık girmemişse dosya adını temizle ve kullan
-             const cleanName = name.replace(/_/g, ' ').replace('.html', '');
+             // Dosya uzantısını temizle (html, pdf, docx, xlsx)
+             const cleanName = name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
              const finalTitle = (old && old.title) ? old.title : cleanName;
-
-             // TÜR DÜZELTME: Admin türü değiştirmişse onu kullan (Video vb.), yoksa varsayılanı (Games/Activity) kullan
              const finalSource = (old && old.source) ? old.source : defaultSource;
+
+             // Varsayılan renk ayarı (Vocabulary ise Yeşil)
+             let defColor = 'bg-primary';
+             if (finalSource === 'Interactive_Activities') defColor = 'bg-info';
+             if (finalSource === 'Vocabulary') defColor = 'bg-success';
 
              return {
                 path: realPath,
                 name: name,
                 title: finalTitle,
-                description: (old && old.description) ? old.description : "Click to open.",
+                description: (old && old.description) ? old.description : "Click to view file.",
                 grade: (old && old.grade) ? old.grade : defaultGrade,
                 source: finalSource,
                 unit: (old && old.unit) ? old.unit : "",
-                badgeColor: (old && old.badgeColor) ? old.badgeColor : (finalSource === 'Games' ? 'bg-primary' : 'bg-info'),
+                badgeColor: (old && old.badgeColor) ? old.badgeColor : defColor,
                 isFeatured: (old && old.isFeatured) ? old.isFeatured : false,
                 isVisible: (old && old.isVisible !== undefined) ? old.isVisible : true
              };
           }
 
-          // --- 1. GAMES TARAMASI ---
+          // 1. GAMES TARAMASI
           if (fs.existsSync(gamesDir)) {
             fs.readdirSync(gamesDir).forEach(grade => {
               const gradePath = path.join(gamesDir, grade);
@@ -78,7 +83,7 @@ jobs:
             });
           }
 
-          // --- 2. INTERACTIVE ACTIVITIES TARAMASI ---
+          // 2. INTERACTIVE ACTIVITIES TARAMASI (Sadece HTML)
           if (fs.existsSync(activitiesDir)) {
             fs.readdirSync(activitiesDir).forEach(grade => {
               const gradePath = path.join(activitiesDir, grade);
@@ -93,6 +98,22 @@ jobs:
             });
           }
 
+          // 3. VOCABULARY TARAMASI (HTML, PDF, DOCX, XLSX)
+          if (fs.existsSync(vocabDir)) {
+            fs.readdirSync(vocabDir).forEach(grade => {
+              const gradePath = path.join(vocabDir, grade);
+              if (fs.statSync(gradePath).isDirectory()) {
+                fs.readdirSync(gradePath).forEach(file => {
+                  // Kabul edilen uzantılar
+                  if (file.match(/\.(html|pdf|docx|xlsx)$/i)) {
+                    const fullPath = `${vocabDir}/${grade}/${file}`;
+                    results.push(createEntry(fullPath, file, grade, 'Vocabulary'));
+                  }
+                });
+              }
+            });
+          }
+
           fs.writeFileSync(outputFile, JSON.stringify(results, null, 2));
 
     - name: Commit and Push
@@ -100,4 +121,4 @@ jobs:
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
         git add games_data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Fix Titles and Categories 🔧" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Updated Content List with Vocabulary 📚" && git push)
