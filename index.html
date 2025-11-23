@@ -15,19 +15,20 @@
         .game-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .card-body { padding: 1.2rem; }
         
-        /* Kategori İkonları ve Renkleri */
+        /* İkon Kutuları ve Renkleri */
         .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
-        .style-Games { background-color: #d63384; }      /* Pembe */
-        .style-Videos { background-color: #dc3545; }     /* Kırmızı */
-        .style-Vocabulary { background-color: #198754; } /* Yeşil */
-        .style-Grammar { background-color: #fd7e14; }    /* Turuncu */
-        .style-Documents { background-color: #0dcaf0; }  /* Mavi */
-        .style-Slides { background-color: #6f42c1; }     /* Mor */
+        .style-Games { background-color: #d63384; }                  /* Pembe */
+        .style-Interactive_Activities { background-color: #0d6efd; } /* Mavi */
+        .style-Videos { background-color: #dc3545; }                 /* Kırmızı */
+        .style-Vocabulary { background-color: #198754; }             /* Yeşil */
+        .style-Grammar { background-color: #fd7e14; }                /* Turuncu */
+        .style-Documents { background-color: #0dcaf0; }              /* Açık Mavi */
+        .style-Slides { background-color: #6f42c1; }                 /* Mor */
 
         .section-title { border-left: 5px solid #0d6efd; padding-left: 15px; margin: 30px 0 20px 0; font-weight: bold; color: #333; }
         
-        /* Mobil Uyumlu Sekmeler */
+        /* Sekmeler */
         .nav-pills .nav-link { border-radius: 20px; padding: 10px 25px; margin: 0 5px; color: #555; font-weight: 600; background: white; border: 1px solid #eee; }
         .nav-pills .nav-link.active { background-color: #0d6efd; color: white; box-shadow: 0 4px 10px rgba(13,110,253,0.3); border: none; }
         
@@ -60,30 +61,27 @@
 </div>
 
 <footer class="text-center py-4 text-muted mt-5">
-    <small>&copy; 2025 English Game Hub - For Students</small>
+    <small>&copy; 2025 English Game Hub</small>
 </footer>
 
 <script>
-    // --- KONFİGÜRASYON ---
-    // Her türün ikonu ve görünen adı
-    const TYPE_CONFIG = {
-        'Games': { icon: 'fa-gamepad', title: '🎮 Interactive Games' },
-        'Videos': { icon: 'fa-youtube', title: '🎬 Watch & Learn' },
-        'Vocabulary': { icon: 'fa-book-open', title: '📖 Vocabulary Lists' },
-        'Grammar': { icon: 'fa-pen-nib', title: '✍️ Grammar Exercises' },
-        'Documents': { icon: 'fa-file-pdf', title: '📄 Worksheets & PDFs' },
-        'Slides': { icon: 'fa-person-chalkboard', title: '📊 Presentations' }
-    };
+    // --- GÖRÜNÜM AYARLARI ---
+    // Burada tanımlı olanlar sırayla basılır. Eğer o türde içerik yoksa EKRANA BASILMAZ.
+    const SECTIONS = [
+        { key: 'Games', title: '🎮 Interactive Games', icon: 'fa-gamepad' },
+        { key: 'Interactive_Activities', title: '🧩 Interactive Activities', icon: 'fa-laptop-code' },
+        { key: 'Videos', title: '🎬 Videos', icon: 'fa-youtube' },
+        { key: 'Vocabulary', title: '📖 Vocabulary', icon: 'fa-book-open' },
+        { key: 'Grammar', title: '✍️ Grammar', icon: 'fa-pen-nib' },
+        { key: 'Slides', title: '📊 Slides', icon: 'fa-person-chalkboard' },
+        { key: 'Documents', title: '📄 Documents', icon: 'fa-file-pdf' }
+    ];
 
-    // Verileri Çek
     fetch('games_data.json')
         .then(response => response.json())
         .then(data => {
-            // Verileri tersten sırala (En yeni en üstte olması için)
-            // GitHub Action normalde dosya adina göre vs. sıralar, array'in sonu genelde en yenidir.
-            // Biz ters çevirerek en son işleneni en başa alıyoruz.
+            // En yeni eklenenler en üstte olsun
             const reversedData = data.reverse();
-            
             renderGrade('9TH_GRADE', 'grade9', reversedData);
             renderGrade('10TH_GRADE', 'grade10', reversedData);
             renderGrade('11TH_GRADE', 'grade11', reversedData);
@@ -93,7 +91,7 @@
 
     function renderGrade(gradeKey, containerId, allData) {
         const container = document.getElementById(containerId);
-        // Sadece bu sınıfın ve aktif olan verilerini filtrele
+        // Sadece bu sınıfın ve gizli olmayan içerikleri al
         const gradeItems = allData.filter(item => item.grade === gradeKey && item.isVisible !== false);
         
         if (gradeItems.length === 0) {
@@ -103,23 +101,20 @@
 
         let htmlContent = "";
 
-        // TURLERE GÖRE GRUPLA
-        // Tanımlı sıraya göre ekrana bas (Games önce, sonra Video...)
-        const orderedTypes = ['Games', 'Videos', 'Vocabulary', 'Grammar', 'Slides', 'Documents'];
-        
-        orderedTypes.forEach(type => {
-            // Bu türdeki içerikleri bul
-            const itemsInType = gradeItems.filter(item => item.source === type);
+        // Tanımlı bölümleri döngüye al (Games, Activities, vs.)
+        SECTIONS.forEach(section => {
+            // Sadece bu türdeki (source) içerikleri bul
+            const itemsInThisSection = gradeItems.filter(item => item.source === section.key);
             
-            if (itemsInType.length > 0) {
-                // Başlık ekle
-                const config = TYPE_CONFIG[type] || { icon: 'fa-folder', title: type };
-                htmlContent += `<h3 class="section-title"><i class="fa-solid ${config.icon}"></i> ${config.title}</h3>`;
-                
-                // Grid başlat
+            // DİKKAT: Eğer bu türde içerik varsa başlığı ve kartları ekle, YOKSA HİÇBİR ŞEY YAPMA.
+            if (itemsInThisSection.length > 0) {
+                htmlContent += `<h3 class="section-title"><i class="fa-solid ${section.icon}"></i> ${section.title}</h3>`;
                 htmlContent += `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
                 
-                itemsInType.forEach(item => {
+                itemsInThisSection.forEach(item => {
+                    // BAŞLIK KONTROLÜ: Admin başlık girmemişse dosya adını göster
+                    const displayTitle = item.title || item.name.replace('.html', '').replace(/_/g, ' ');
+                    
                     const badge = item.unit ? `<span class="unit-badge">${item.unit}</span>` : '';
                     const star = item.isFeatured ? `<i class="fa-solid fa-star text-warning ms-1"></i>` : '';
                     
@@ -129,32 +124,24 @@
                             <div class="card game-card shadow-sm h-100">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start">
-                                        <div class="icon-box style-${type}">
-                                            <i class="fa-solid ${config.icon}"></i>
+                                        <div class="icon-box style-${section.key}">
+                                            <i class="fa-solid ${section.icon}"></i>
                                         </div>
                                         ${star}
                                     </div>
                                     ${badge}
-                                    <h5 class="card-title fw-bold mt-2">${item.title}</h5>
-                                    <p class="card-text text-muted small">${item.description || 'Click to open resource.'}</p>
+                                    <h5 class="card-title fw-bold mt-2">${displayTitle}</h5>
+                                    <p class="card-text text-muted small">${item.description || 'Click to open.'}</p>
                                 </div>
                             </div>
                         </a>
                     </div>`;
                 });
                 
-                htmlContent += `</div>`; // Grid bitir
+                htmlContent += `</div>`; // Row bitişi
             }
         });
         
-        // Diğer (Tanımsız) türler varsa onları da sona ekle
-        const otherItems = gradeItems.filter(item => !orderedTypes.includes(item.source));
-        if(otherItems.length > 0) {
-             htmlContent += `<h3 class="section-title">Other Activities</h3><div class="row row-cols-1 row-cols-md-3 g-4">`;
-             otherItems.forEach(item => { /* Standart kart kodu... */ });
-             htmlContent += `</div>`;
-        }
-
         container.innerHTML = htmlContent;
     }
 </script>
