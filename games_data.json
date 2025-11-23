@@ -3,11 +3,11 @@
     "name": "deneme 2",
     "path": "Games/10TH_GRADE/deneme 2/index.html",
     "type": "dir",
-    "grade": "11TH_GRADE",
+    "grade": "10TH_GRADE",
     "source": "Games",
     "title": "10.2.Milyoner",
     "description": "Have fun",
-    "unit": "UNIT 2"
+    "unit": "Theme 2"
   },
   {
     "name": "Suleyman_The_Magnificent.html",
@@ -15,7 +15,7 @@
     "type": "file",
     "grade": "10TH_GRADE",
     "source": "Interactive_Activities",
-    "isVisible": false
+    "isVisible": true
   },
   {
     "name": "Unforgettable_Hero.html",
