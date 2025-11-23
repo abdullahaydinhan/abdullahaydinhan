@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; padding-top: 70px; }
-        
-        /* NAVBAR TASARIMI */
         .navbar { box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 10px 0; }
         .navbar-brand { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
         .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; position: relative; }
@@ -17,17 +15,10 @@
         .nav-link.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 3px; background: #0d6efd; border-radius: 5px; }
         .dropdown-item { font-weight: 500; cursor: pointer; padding: 10px 20px; }
         .dropdown-item:hover { background-color: #f0f7ff; color: #0d6efd; }
-
-        /* ANA EKRAN (HERO) */
         .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 90px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
-        
-        /* KARTLAR */
         .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; cursor: pointer; }
         .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #0d6efd; }
-        
         .icon-box { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 1.2rem; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
-        /* KATEGORİ RENKLERİ */
         .icon-Games { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #d63384; }
         .icon-Interactive_Activities { background-color: #0d6efd; }
         .icon-Videos { background-color: #dc3545; }
@@ -35,13 +26,9 @@
         .icon-Grammar { background-color: #fd7e14; }
         .icon-Slides { background-color: #6f42c1; }
         .icon-Documents { background-color: #0dcaf0; }
-
-        /* SAYFA GÖRÜNÜM GEÇİŞLERİ */
         .view-section { display: none; animation: fadeIn 0.5s ease; }
         .view-section.active-view { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* TAB BUTONLARI */
         .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
         .nav-pills .nav-link.active { background-color: #0d6efd; border-color: #0d6efd; color: white; transform: scale(1.05); box-shadow: 0 4px 15px rgba(13,110,253,0.3); }
         .unit-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; background: #eef2ff; color: #4f46e5; padding: 5px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 8px; }
@@ -51,22 +38,15 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
     <div class="container">
-        <a class="navbar-brand text-primary" href="#" onclick="switchView('home')">
-            <i class="fa-solid fa-graduation-cap"></i> EGH
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <a class="navbar-brand text-primary" href="#" onclick="switchView('home')"><i class="fa-solid fa-graduation-cap"></i> EGH</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item"><a class="nav-link active" id="nav-home" onclick="switchView('home')">Home</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-Games" onclick="switchView('Games')">Games</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-Interactive_Activities" onclick="switchView('Interactive_Activities')">Interactive Activities</a></li>
-                
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        Study Materials
-                    </a>
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Study Materials</a>
                     <ul class="dropdown-menu border-0 shadow">
                         <li><a class="dropdown-item" onclick="switchView('Vocabulary')"><i class="fa-solid fa-book-open text-success me-2"></i> Vocabulary</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Grammar')"><i class="fa-solid fa-pen-nib text-warning me-2"></i> Grammar</a></li>
@@ -75,11 +55,8 @@
                         <li><a class="dropdown-item" onclick="switchView('Documents')"><i class="fa-solid fa-file-pdf text-info me-2"></i> Documents</a></li>
                     </ul>
                 </li>
-
                 <li class="nav-item"><a class="nav-link" id="nav-about" onclick="switchView('about')">About</a></li>
-                <li class="nav-item ms-2">
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button>
-                </li>
+                <li class="nav-item ms-2"><button class="btn btn-primary rounded-pill px-4 fw-bold btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button></li>
             </ul>
         </div>
     </div>
@@ -96,32 +73,11 @@
             </div>
         </div>
     </div>
-    
     <div class="container text-center py-5">
         <div class="row g-4">
-            <div class="col-md-4">
-                <div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Games')">
-                    <i class="fa-solid fa-gamepad fa-3x text-primary mb-3"></i>
-                    <h4 class="fw-bold">Fun Games</h4>
-                    <p class="text-muted">Learn vocabulary and grammar while playing fun interactive games.</p>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Interactive_Activities')">
-                    <i class="fa-solid fa-laptop-code fa-3x text-success mb-3"></i>
-                    <h4 class="fw-bold">Digital Activities</h4>
-                    <p class="text-muted">Access worksheets, reading passages, and online exercises anywhere.</p>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="alert('🚧 Exam Prep materials are coming soon!\n\nPlease check back later.')">
-                    <i class="fa-solid fa-graduation-cap fa-3x text-warning mb-3"></i>
-                    <h4 class="fw-bold">Exam Prep</h4>
-                    <p class="text-muted">Review for your exams with our curated revision materials.</p>
-                </div>
-            </div>
+            <div class="col-md-4"><div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Games')"><i class="fa-solid fa-gamepad fa-3x text-primary mb-3"></i><h4 class="fw-bold">Fun Games</h4><p class="text-muted">Learn vocabulary and grammar while playing fun interactive games.</p></div></div>
+            <div class="col-md-4"><div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="switchView('Interactive_Activities')"><i class="fa-solid fa-laptop-code fa-3x text-success mb-3"></i><h4 class="fw-bold">Digital Activities</h4><p class="text-muted">Access worksheets, reading passages, and online exercises anywhere.</p></div></div>
+            <div class="col-md-4"><div class="p-5 bg-white rounded-4 shadow-sm h-100 game-card" onclick="alert('🚧 Exam Prep materials are coming soon!')"><i class="fa-solid fa-graduation-cap fa-3x text-warning mb-3"></i><h4 class="fw-bold">Exam Prep</h4><p class="text-muted">Review for your exams with our curated revision materials.</p></div></div>
         </div>
     </div>
 </div>
@@ -132,70 +88,32 @@
             <div class="bg-white p-5 rounded-4 shadow-sm">
                 <img src="https://cdn-icons-png.flaticon.com/512/3429/3429149.png" alt="Teacher" width="100" class="mb-3">
                 <h2 class="fw-bold mb-4">About the Platform</h2>
-                <p class="text-muted fs-5">
-                    Welcome to the <strong>English Game Hub!</strong><br><br>
-                    I am an English Teacher dedicated to making language learning accessible and enjoyable. 
-                    I created this platform to help my <strong>9th, 10th, 11th, and 12th-grade students</strong> practice English through digital games, 
-                    interactive quizzes, and engaging activities.
-                </p>
-                <div class="mt-4 p-3 bg-light rounded-3 d-inline-block">
-                    <h5 class="fw-bold text-primary m-0">Have fun and keep learning! 🚀</h5>
-                </div>
+                <p class="text-muted fs-5">Welcome to the <strong>English Game Hub!</strong><br><br>I am an English Teacher dedicated to making language learning accessible and enjoyable. I created this platform to help my <strong>9th, 10th, 11th, and 12th-grade students</strong> practice English through digital games, interactive quizzes, and engaging activities.</p>
+                <div class="mt-4 p-3 bg-light rounded-3 d-inline-block"><h5 class="fw-bold text-primary m-0">Have fun and keep learning! 🚀</h5></div>
             </div>
         </div>
     </div>
 </div>
 
 <div id="view-content" class="view-section container mt-4">
-    <div class="text-center mb-5">
-        <h2 id="page-title" class="fw-bold display-6">Library</h2>
-        <p id="page-subtitle" class="text-muted">Select your grade to see the materials.</p>
-    </div>
-
+    <div class="text-center mb-5"><h2 id="page-title" class="fw-bold display-6">Library</h2><p id="page-subtitle" class="text-muted">Select your grade to see the materials.</p></div>
     <ul class="nav nav-pills justify-content-center mb-5" id="gradeTabs">
         <li class="nav-item"><button class="nav-link active" onclick="changeGrade('9TH_GRADE', this)">9. Sınıf</button></li>
         <li class="nav-item"><button class="nav-link" onclick="changeGrade('10TH_GRADE', this)">10. Sınıf</button></li>
         <li class="nav-item"><button class="nav-link" onclick="changeGrade('11TH_GRADE', this)">11. Sınıf</button></li>
         <li class="nav-item"><button class="nav-link" onclick="changeGrade('12TH_GRADE', this)">12. Sınıf</button></li>
     </ul>
-
     <div id="content-display"></div>
 </div>
 
-<footer class="text-center py-4 mt-5 border-top bg-white">
-    <small class="text-muted">&copy; 2025 English Game Hub - Designed for Students</small>
-</footer>
+<footer class="text-center py-4 mt-5 border-top bg-white"><small class="text-muted">&copy; 2025 English Game Hub - Designed for Students</small></footer>
 
-<div class="modal fade" id="contactModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fa-solid fa-envelope"></i> Contact Teacher</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4 text-center">
-                <i class="fa-solid fa-paper-plane fa-3x text-primary mb-3"></i>
-                <p class="fs-5">Hello! Do you have any questions?</p>
-                <p class="text-muted">Feel free to send me an email regarding the games, lessons, or homework.</p>
-                <div class="alert alert-light border mt-3">
-                    <strong><i class="fa-solid fa-at"></i> Email:</strong><br>
-                    <a href="mailto:abdullahaydınhan@gmail.com" class="text-decoration-none fw-bold text-break">abdullahaydınhan@gmail.com</a>
-                </div>
-            </div>
-            <div class="modal-footer border-0 justify-content-center pb-4">
-                <button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="modal fade" id="contactModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-envelope"></i> Contact Teacher</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4 text-center"><i class="fa-solid fa-paper-plane fa-3x text-primary mb-3"></i><p class="fs-5">Hello! Do you have any questions?</p><p class="text-muted">Feel free to send me an email.</p><div class="alert alert-light border mt-3"><strong><i class="fa-solid fa-at"></i> Email:</strong><br><a href="mailto:abdullahaydınhan@gmail.com" class="text-decoration-none fw-bold text-break">abdullahaydınhan@gmail.com</a></div></div><div class="modal-footer border-0 justify-content-center pb-4"><button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Close</button></div></div></div></div>
 
 <script>
-    // --- VERİ YÖNETİMİ ---
     let allData = [];
     let currentMode = 'home'; 
     let currentGrade = '9TH_GRADE';
-
-    // --- KATEGORİ AYARLARI ---
     const CONFIG = {
         'Games': { title: '🎮 Interactive Games', subtitle: 'Play and learn with our game collection.', icon: 'fa-gamepad' },
         'Interactive_Activities': { title: '🧩 Interactive Activities', subtitle: 'Digital exercises and quizzes.', icon: 'fa-laptop-code' },
@@ -206,115 +124,56 @@
         'Documents': { title: '📄 Documents', subtitle: 'Worksheets and PDFs.', icon: 'fa-file-pdf' }
     };
 
-    // --- BAŞLANGIÇ: VERİYİ ÇEK ---
-    fetch('games_data.json')
-        .then(response => response.json())
-        .then(data => { 
-            // Veriyi ters çevir (En Yeni -> En Eski)
-            allData = data.reverse(); 
-        })
-        .catch(err => console.error(err));
+    fetch('games_data.json').then(r => r.json()).then(d => { allData = d.reverse(); }).catch(e => console.error(e));
 
-    // --- GÖRÜNÜM DEĞİŞTİRİCİ ---
     function switchView(viewName) {
-        // 1. Navbar'da Aktif Linki Ayarla
         document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-        if(document.getElementById('nav-' + viewName)) {
-            document.getElementById('nav-' + viewName).classList.add('active');
-        }
-
-        // 2. Sayfaları Gizle/Göster
+        if(document.getElementById('nav-' + viewName)) document.getElementById('nav-' + viewName).classList.add('active');
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
 
-        if (viewName === 'home') {
-            document.getElementById('view-home').classList.add('active-view');
-        } else if (viewName === 'about') {
-            document.getElementById('view-about').classList.add('active-view');
-        } else {
-            // İçerik Sayfası (Games, Activities vb.)
+        if (viewName === 'home') document.getElementById('view-home').classList.add('active-view');
+        else if (viewName === 'about') document.getElementById('view-about').classList.add('active-view');
+        else {
             document.getElementById('view-content').classList.add('active-view');
             currentMode = viewName; 
-            
-            // Başlıkları Dinamik Güncelle
             const conf = CONFIG[viewName] || { title: viewName, subtitle: 'Resource Library' };
             document.getElementById('page-title').innerHTML = conf.title;
             document.getElementById('page-subtitle').innerHTML = conf.subtitle;
-
             renderContent();
         }
-        
-        // Mobilde Menüyü Kapat
         const navBar = document.getElementById('navbarNav');
-        if (navBar.classList.contains('show')) {
-            new bootstrap.Collapse(navBar).hide();
-        }
+        if (navBar.classList.contains('show')) new bootstrap.Collapse(navBar).hide();
         window.scrollTo(0,0);
     }
 
-    // --- SINIF DEĞİŞTİRİCİ ---
-    function changeGrade(grade, btnElement) {
+    function changeGrade(grade, btn) {
         currentGrade = grade;
-        document.querySelectorAll('#gradeTabs .nav-link').forEach(btn => btn.classList.remove('active'));
-        btnElement.classList.add('active');
+        document.querySelectorAll('#gradeTabs .nav-link').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
         renderContent();
     }
 
-    // --- İÇERİĞİ EKRANA BAS ---
     function renderContent() {
         const container = document.getElementById('content-display');
-        
-        // 1. Filtreleme: Sınıf + Mod (Source) + Görünürlük
-        const items = allData.filter(item => 
-            item.grade === currentGrade && 
-            item.source === currentMode && 
-            item.isVisible !== false
-        );
+        const items = allData.filter(item => item.grade === currentGrade && item.source === currentMode && item.isVisible !== false);
 
-        // 2. Eğer İçerik Yoksa Uyarı Göster
         if (items.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light">
-                    <i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-25"></i>
-                    <h5 class="text-muted fw-bold">No content available yet.</h5>
-                    <small class="text-muted">Check back later for updates!</small>
-                </div>`;
+            container.innerHTML = `<div class="text-center py-5 bg-white rounded-4 shadow-sm border border-light"><i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-25"></i><h5 class="text-muted fw-bold">No content available yet.</h5><small class="text-muted">Check back later for updates!</small></div>`;
             return;
         }
 
-        // 3. İçerik Varsa Kartları Oluştur
         let html = `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
-        
         items.forEach(item => {
             const displayTitle = item.title || item.name.replace('.html', '').replace(/_/g, ' ');
             const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
             const star = item.isFeatured ? `<i class="fa-solid fa-star text-warning ms-1 float-end"></i>` : '';
             const conf = CONFIG[currentMode] || { icon: 'fa-file' };
-
-            html += `
-            <div class="col">
-                <a href="${item.path}" class="text-decoration-none text-dark" target="_blank">
-                    <div class="game-card h-100 position-relative">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between">
-                                <div class="icon-box icon-${currentMode}">
-                                    <i class="fa-solid ${conf.icon}"></i>
-                                </div>
-                                ${star}
-                            </div>
-                            ${badge}
-                            <h5 class="fw-bold mb-2">${displayTitle}</h5>
-                            <p class="text-muted small mb-0">${item.description || 'Click to open resource.'}</p>
-                        </div>
-                    </div>
-                </a>
-            </div>`;
+            html += `<div class="col"><a href="${item.path}" class="text-decoration-none text-dark" target="_blank"><div class="game-card h-100 position-relative"><div class="card-body p-4"><div class="d-flex justify-content-between"><div class="icon-box icon-${currentMode}"><i class="fa-solid ${conf.icon}"></i></div>${star}</div>${badge}<h5 class="fw-bold mb-2">${displayTitle}</h5><p class="text-muted small mb-0">${item.description || 'Click to open resource.'}</p></div></div></a></div>`;
         });
-
         html += `</div>`;
         container.innerHTML = html;
     }
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
