@@ -7,191 +7,297 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; padding-top: 70px; }
         
-        /* NAVBAR (ÜST MENÜ) AYARLARI */
-        .navbar { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .navbar-brand { font-weight: bold; font-size: 1.5rem; }
+        /* NAVBAR */
+        .navbar { box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 10px 0; }
+        .navbar-brand { font-weight: 800; font-size: 1.5rem; }
+        .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; }
+        .nav-link.active { color: #0d6efd !important; }
+        .dropdown-item { font-weight: 500; cursor: pointer; }
+
+        /* HERO & ABOUT */
+        .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 80px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
         
-        /* HERO (BAŞLIK) ALANI */
-        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 0; margin-bottom: 30px; border-radius: 0 0 30px 30px; }
-        
-        /* KART TASARIMI */
-        .game-card { border: none; border-radius: 15px; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; height: 100%; background: white; }
-        .game-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .card-body { padding: 1.2rem; }
-        
-        /* İKON KUTULARI VE RENKLERİ */
+        /* CARDS */
+        .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; }
+        .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: transparent; }
         .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
-        .style-Games { background-color: #d63384; }                  /* Pembe */
-        .style-Interactive_Activities { background-color: #0d6efd; } /* Mavi */
-        .style-Videos { background-color: #dc3545; }                 /* Kırmızı */
-        .style-Vocabulary { background-color: #198754; }             /* Yeşil */
-        .style-Grammar { background-color: #fd7e14; }                /* Turuncu */
-        .style-Documents { background-color: #0dcaf0; }              /* Açık Mavi */
-        .style-Slides { background-color: #6f42c1; }                 /* Mor */
+        /* RENKLER */
+        .icon-Games { background-color: #d63384; }
+        .icon-Interactive_Activities { background-color: #0d6efd; }
+        .icon-Videos { background-color: #dc3545; }
+        .icon-Vocabulary { background-color: #198754; }
+        .icon-Grammar { background-color: #fd7e14; }
+        .icon-Slides { background-color: #6f42c1; }
+        .icon-Documents { background-color: #0dcaf0; }
 
-        .section-title { border-left: 5px solid #0d6efd; padding-left: 15px; margin: 30px 0 20px 0; font-weight: bold; color: #333; }
-        
-        /* SEKMELER */
-        .nav-pills .nav-link { border-radius: 20px; padding: 10px 25px; margin: 0 5px; color: #555; font-weight: 600; background: white; border: 1px solid #eee; }
-        .nav-pills .nav-link.active { background-color: #0d6efd; color: white; box-shadow: 0 4px 10px rgba(13,110,253,0.3); border: none; }
-        
-        .unit-badge { font-size: 0.75rem; background: #eef2ff; color: #4f46e5; padding: 4px 8px; border-radius: 6px; font-weight: 600; display: inline-block; margin-bottom: 5px; }
+        /* VIEW SYSTEM */
+        .view-section { display: none; animation: fadeIn 0.4s; }
+        .view-section.active-view { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TABS */
+        .nav-pills .nav-link { border-radius: 50px; padding: 8px 25px; margin: 0 5px; background: white; border: 1px solid #dee2e6; color: #6c757d; font-weight: 700; }
+        .nav-pills .nav-link.active { background-color: #0d6efd; color: white; border-color: #0d6efd; box-shadow: 0 4px 10px rgba(13,110,253,0.2); }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="#"><i class="fa-solid fa-graduation-cap"></i> EGH</a>
+        <a class="navbar-brand text-primary" href="#" onclick="switchView('home')">
+            <i class="fa-solid fa-graduation-cap"></i> EGH
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#"><i class="fa-solid fa-house"></i> Home</a>
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link active" id="nav-home" onclick="switchView('home')">Home</a></li>
+                <li class="nav-item"><a class="nav-link" id="nav-Games" onclick="switchView('Games')">Games</a></li>
+                <li class="nav-item"><a class="nav-link" id="nav-Interactive_Activities" onclick="switchView('Interactive_Activities')">Interactive Activities</a></li>
+                
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        Study Materials
+                    </a>
+                    <ul class="dropdown-menu border-0 shadow">
+                        <li><a class="dropdown-item" onclick="switchView('Vocabulary')"><i class="fa-solid fa-book-open text-success me-2"></i> Vocabulary</a></li>
+                        <li><a class="dropdown-item" onclick="switchView('Grammar')"><i class="fa-solid fa-pen-nib text-warning me-2"></i> Grammar</a></li>
+                        <li><a class="dropdown-item" onclick="switchView('Videos')"><i class="fa-solid fa-youtube text-danger me-2"></i> Videos</a></li>
+                        <li><a class="dropdown-item" onclick="switchView('Slides')"><i class="fa-solid fa-person-chalkboard text-primary me-2"></i> Slides</a></li>
+                        <li><a class="dropdown-item" onclick="switchView('Documents')"><i class="fa-solid fa-file-pdf text-info me-2"></i> Documents</a></li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#content-area"><i class="fa-solid fa-gamepad"></i> Games & Activities</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#contactModal"><i class="fa-solid fa-envelope"></i> Contact</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-warning" href="admin.html" target="_blank"><i class="fa-solid fa-lock"></i> Admin</a>
+
+                <li class="nav-item"><a class="nav-link" id="nav-about" onclick="switchView('about')">About</a></li>
+                <li class="nav-item ms-2">
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold btn-sm" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="hero-section text-center shadow">
-    <div class="container">
-        <h1 class="display-4 fw-bold">English Game Hub</h1>
-        <p class="lead">Learn English with Fun & Interactive Activities</p>
-        <a href="#content-area" class="btn btn-light btn-lg mt-3 fw-bold text-primary rounded-pill">Start Learning</a>
+<div id="view-home" class="view-section active-view">
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-3">English Game Hub</h1>
+            <p class="lead mb-4 opacity-75">Interactive Games, Quizzes, and Activities for High School Students.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <button onclick="switchView('Games')" class="btn btn-light btn-lg rounded-pill fw-bold text-primary px-5 shadow">Play Games</button>
+                <button onclick="switchView('Interactive_Activities')" class="btn btn-outline-light btn-lg rounded-pill fw-bold px-5">Activities</button>
+            </div>
+        </div>
+    </div>
+    <div class="container text-center py-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <i class="fa-solid fa-gamepad fa-3x text-primary mb-3"></i>
+                    <h4>Fun Games</h4>
+                    <p class="text-muted">Learn vocabulary and grammar while playing fun interactive games.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <i class="fa-solid fa-laptop-code fa-3x text-success mb-3"></i>
+                    <h4>Digital Activities</h4>
+                    <p class="text-muted">Access worksheets, reading passages, and online exercises anywhere.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+                    <i class="fa-solid fa-graduation-cap fa-3x text-warning mb-3"></i>
+                    <h4>Exam Prep</h4>
+                    <p class="text-muted">Review for your exams with our curated revision materials.</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="container" id="content-area">
-    <ul class="nav nav-pills justify-content-center mb-5" id="gradeTabs" role="tablist">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#grade9" type="button">9. Sınıf</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#grade10" type="button">10. Sınıf</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#grade11" type="button">11. Sınıf</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#grade12" type="button">12. Sınıf</button></li>
+<div id="view-about" class="view-section container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="bg-white p-5 rounded-4 shadow-sm">
+                <img src="https://cdn-icons-png.flaticon.com/512/3429/3429149.png" alt="Teacher" width="100" class="mb-3">
+                <h2 class="fw-bold mb-4">About the Platform</h2>
+                <p class="text-muted fs-5">
+                    Welcome to the <strong>English Game Hub!</strong><br><br>
+                    I am an English Teacher dedicated to making language learning accessible and enjoyable. 
+                    I created this platform to help my <strong>9th, 10th, 11th, and 12th-grade students</strong> practice English through digital games, 
+                    interactive quizzes, and engaging activities.
+                </p>
+                <h5 class="fw-bold text-primary mt-4">Have fun and keep learning! 🚀</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="view-content" class="view-section container mt-4">
+    <div class="text-center mb-5">
+        <h2 id="page-title" class="fw-bold display-6">Library</h2>
+        <p id="page-subtitle" class="text-muted">Select your grade to see the materials.</p>
+    </div>
+
+    <ul class="nav nav-pills justify-content-center mb-5" id="gradeTabs">
+        <li class="nav-item"><button class="nav-link active" onclick="changeGrade('9TH_GRADE', this)">9. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="changeGrade('10TH_GRADE', this)">10. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="changeGrade('11TH_GRADE', this)">11. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" onclick="changeGrade('12TH_GRADE', this)">12. Sınıf</button></li>
     </ul>
 
-    <div class="tab-content" id="gradeContent">
-        <div class="tab-pane fade show active" id="grade9">
-            <div class="text-center py-5"><div class="spinner-border text-primary"></div><br>Yükleniyor...</div>
-        </div>
-        <div class="tab-pane fade" id="grade10">Yükleniyor...</div>
-        <div class="tab-pane fade" id="grade11">Yükleniyor...</div>
-        <div class="tab-pane fade" id="grade12">Yükleniyor...</div>
-    </div>
+    <div id="content-display"></div>
 </div>
 
-<footer class="text-center py-4 text-muted mt-5 border-top">
-    <small>&copy; 2025 English Game Hub - Designed for Students</small>
+<footer class="text-center py-4 mt-5 border-top bg-white">
+    <small class="text-muted">&copy; 2025 English Game Hub - Designed for Students</small>
 </footer>
 
 <div class="modal fade" id="contactModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fa-solid fa-paper-plane"></i> Contact Teacher</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fa-solid fa-envelope"></i> Contact Teacher</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>Hello! If you have any questions about the games or English lessons, you can contact me.</p>
-                <hr>
-                <p><strong><i class="fa-solid fa-envelope"></i> Email:</strong> <a href="mailto:teacher@example.com">teacher@example.com</a></p>
-                <p class="text-muted small">Have fun learning!</p>
+            <div class="modal-body p-4 text-center">
+                <i class="fa-solid fa-paper-plane fa-3x text-primary mb-3"></i>
+                <p class="fs-5">Hello! Do you have any questions?</p>
+                <p class="text-muted">Feel free to send me an email regarding the games, lessons, or homework.</p>
+                <div class="alert alert-light border mt-3">
+                    <strong><i class="fa-solid fa-at"></i> Email:</strong><br>
+                    <a href="mailto:abdullahaydınhan@gmail.com" class="text-decoration-none fw-bold text-break">abdullahaydınhan@gmail.com</a>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- GÖRÜNÜM AYARLARI ---
-    const SECTIONS = [
-        { key: 'Games', title: '🎮 Interactive Games', icon: 'fa-gamepad' },
-        { key: 'Interactive_Activities', title: '🧩 Interactive Activities', icon: 'fa-laptop-code' },
-        { key: 'Videos', title: '🎬 Videos', icon: 'fa-youtube' },
-        { key: 'Vocabulary', title: '📖 Vocabulary', icon: 'fa-book-open' },
-        { key: 'Grammar', title: '✍️ Grammar', icon: 'fa-pen-nib' },
-        { key: 'Slides', title: '📊 Slides', icon: 'fa-person-chalkboard' },
-        { key: 'Documents', title: '📄 Documents', icon: 'fa-file-pdf' }
-    ];
+    // --- STATE MANAGEMENT ---
+    let allData = [];
+    let currentMode = 'home'; 
+    let currentGrade = '9TH_GRADE';
 
+    // --- CONFIGURATION ---
+    const CONFIG = {
+        'Games': { title: '🎮 Interactive Games', subtitle: 'Play and learn with our game collection.', icon: 'fa-gamepad' },
+        'Interactive_Activities': { title: '🧩 Interactive Activities', subtitle: 'Digital exercises and quizzes.', icon: 'fa-laptop-code' },
+        'Videos': { title: '🎬 Educational Videos', subtitle: 'Watch and learn.', icon: 'fa-youtube' },
+        'Vocabulary': { title: '📖 Vocabulary Lists', subtitle: 'Expand your word power.', icon: 'fa-book-open' },
+        'Grammar': { title: '✍️ Grammar Exercises', subtitle: 'Master the rules of English.', icon: 'fa-pen-nib' },
+        'Slides': { title: '📊 Presentations', subtitle: 'Lesson slides and summaries.', icon: 'fa-person-chalkboard' },
+        'Documents': { title: '📄 Documents', subtitle: 'Worksheets and PDFs.', icon: 'fa-file-pdf' }
+    };
+
+    // --- INITIALIZATION ---
     fetch('games_data.json')
         .then(response => response.json())
-        .then(data => {
-            const reversedData = data.reverse();
-            renderGrade('9TH_GRADE', 'grade9', reversedData);
-            renderGrade('10TH_GRADE', 'grade10', reversedData);
-            renderGrade('11TH_GRADE', 'grade11', reversedData);
-            renderGrade('12TH_GRADE', 'grade12', reversedData);
-        })
-        .catch(error => {
-            console.error('Hata:', error);
-            document.getElementById('grade9').innerHTML = '<div class="alert alert-danger">Veriler yüklenirken hata oluştu.</div>';
-        });
+        .then(data => { allData = data.reverse(); })
+        .catch(err => console.error(err));
 
-    function renderGrade(gradeKey, containerId, allData) {
-        const container = document.getElementById(containerId);
-        const gradeItems = allData.filter(item => item.grade === gradeKey && item.isVisible !== false);
+    // --- VIEW SWITCHER ---
+    function switchView(viewName) {
+        // Navbar Active State
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        if(document.getElementById('nav-' + viewName)) {
+            document.getElementById('nav-' + viewName).classList.add('active');
+        }
+
+        // Show/Hide Sections
+        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
+
+        if (viewName === 'home') {
+            document.getElementById('view-home').classList.add('active-view');
+        } else if (viewName === 'about') {
+            document.getElementById('view-about').classList.add('active-view');
+        } else {
+            // Generic Content View
+            document.getElementById('view-content').classList.add('active-view');
+            currentMode = viewName; 
+            
+            // Set Titles dynamically
+            const conf = CONFIG[viewName] || { title: viewName, subtitle: 'Resource Library' };
+            document.getElementById('page-title').innerHTML = conf.title;
+            document.getElementById('page-subtitle').innerHTML = conf.subtitle;
+
+            renderContent();
+        }
         
-        if (gradeItems.length === 0) {
-            container.innerHTML = `<div class="alert alert-light text-center py-4"><i class="fa-solid fa-folder-open fa-2x text-muted mb-2"></i><br>Bu sınıf için henüz içerik eklenmemiş.</div>`;
+        // Close Mobile Menu
+        const navBar = document.getElementById('navbarNav');
+        if (navBar.classList.contains('show')) {
+            new bootstrap.Collapse(navBar).hide();
+        }
+        window.scrollTo(0,0);
+    }
+
+    // --- GRADE CHANGER ---
+    function changeGrade(grade, btnElement) {
+        currentGrade = grade;
+        document.querySelectorAll('#gradeTabs .nav-link').forEach(btn => btn.classList.remove('active'));
+        btnElement.classList.add('active');
+        renderContent();
+    }
+
+    // --- RENDER CONTENT ---
+    function renderContent() {
+        const container = document.getElementById('content-display');
+        
+        // Filter by Grade AND specific Source Mode (e.g. only 'Videos')
+        const items = allData.filter(item => 
+            item.grade === currentGrade && 
+            item.source === currentMode && 
+            item.isVisible !== false
+        );
+
+        if (items.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-folder-open fa-3x text-muted mb-3 opacity-25"></i>
+                    <h5 class="text-muted">No content available for this section yet.</h5>
+                    <small class="text-muted">Check back later for updates!</small>
+                </div>`;
             return;
         }
 
-        let htmlContent = "";
-
-        SECTIONS.forEach(section => {
-            const itemsInThisSection = gradeItems.filter(item => item.source === section.key);
-            
-            if (itemsInThisSection.length > 0) {
-                htmlContent += `<h3 class="section-title"><i class="fa-solid ${section.icon}"></i> ${section.title}</h3>`;
-                htmlContent += `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
-                
-                itemsInThisSection.forEach(item => {
-                    const displayTitle = item.title || item.name.replace('.html', '').replace(/_/g, ' ');
-                    const badge = item.unit ? `<span class="unit-badge">${item.unit}</span>` : '';
-                    const star = item.isFeatured ? `<i class="fa-solid fa-star text-warning ms-1"></i>` : '';
-                    
-                    htmlContent += `
-                    <div class="col">
-                        <a href="${item.path}" class="text-decoration-none text-dark" target="_blank">
-                            <div class="card game-card shadow-sm h-100">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="icon-box style-${section.key}">
-                                            <i class="fa-solid ${section.icon}"></i>
-                                        </div>
-                                        ${star}
-                                    </div>
-                                    ${badge}
-                                    <h5 class="card-title fw-bold mt-2">${displayTitle}</h5>
-                                    <p class="card-text text-muted small">${item.description || 'Click to open.'}</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>`;
-                });
-                
-                htmlContent += `</div>`;
-            }
-        });
+        let html = `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
         
-        container.innerHTML = htmlContent;
+        items.forEach(item => {
+            const displayTitle = item.title || item.name.replace('.html', '').replace(/_/g, ' ');
+            const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
+            const star = item.isFeatured ? `<i class="fa-solid fa-star text-warning ms-1 float-end"></i>` : '';
+            const conf = CONFIG[currentMode] || { icon: 'fa-file' };
+
+            html += `
+            <div class="col">
+                <a href="${item.path}" class="text-decoration-none text-dark" target="_blank">
+                    <div class="game-card h-100 position-relative">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between">
+                                <div class="icon-box icon-${currentMode}">
+                                    <i class="fa-solid ${conf.icon}"></i>
+                                </div>
+                                ${star}
+                            </div>
+                            ${badge}
+                            <h5 class="fw-bold mb-2">${displayTitle}</h5>
+                            <p class="text-muted small mb-0">${item.description || 'Click to open.'}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>`;
+        });
+
+        html += `</div>`;
+        container.innerHTML = html;
     }
 </script>
 
