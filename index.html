@@ -1,307 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Teacher's Game Hub</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="assets/style.css"> 
-
+    <title>English Game Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-color: #f8f9fa; 
-            --primary-color: #16213e; 
-            --secondary-color: #0f3460; 
-            --accent-color: #e94560; 
-            --accent-hover: #d6304c;
-            --text-color: #2d3436; 
-            --card-bg: #ffffff;
-            --font-main: 'Poppins', sans-serif;
-        }
-        * { box-sizing: border-box; }
-        body { font-family: var(--font-main); background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; margin: 0; min-height: 100vh; display: flex; flex-direction: column; }
-
-        /* HEADER */
-        header { background-color: var(--primary-color); color: white; padding: 15px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
-        header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; color: var(--accent-color); cursor: pointer; }
-        nav { display: flex; gap: 20px; }
-        nav a { color: rgba(255, 255, 255, 0.8); text-decoration: none; padding: 8px 12px; font-weight: 500; position: relative; transition: color 0.3s; cursor: pointer; }
-        nav a::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0; background-color: var(--accent-color); transition: width 0.3s; }
-        nav a:hover::after, nav a.active-link::after { width: 100%; }
-        nav a:hover, nav a.active-link { color: white; }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; margin-bottom: 30px; border-radius: 0 0 30px 30px; }
         
-        /* VIEW CONTROL */
-        .view-section { display: none; animation: fadeIn 0.5s ease-in-out; flex: 1; }
-        .view-section.active-view { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* HERO */
-        .hero { background: linear-gradient(135deg, #16213e 0%, #0f3460 100%); color: white; padding: 80px 20px; text-align: center; border-bottom-left-radius: 50px; border-bottom-right-radius: 50px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(22, 33, 62, 0.2); }
-        .hero h2 { font-size: 2.8rem; margin-bottom: 15px; font-weight: 700; }
-        .hero p { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.9; max-width: 700px; margin-left: auto; margin-right: auto; }
-        .hero .btn { background-color: var(--accent-color); color: white; padding: 12px 35px; border-radius: 30px; text-decoration: none; font-weight: 600; transition: all 0.3s; display: inline-block; box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4); cursor: pointer; }
-        .hero .btn:hover { background-color: var(--accent-hover); transform: translateY(-3px); }
+        /* Kart Tasarımı */
+        .game-card { border: none; border-radius: 15px; transition: transform 0.3s, box-shadow 0.3s; overflow: hidden; height: 100%; background: white; }
+        .game-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card-body { padding: 1.2rem; }
         
-        /* GRIDS & CARDS */
-        .grade-section-title { text-align: left; color: var(--primary-color); margin: 50px auto 30px auto; padding: 10px 20px; border-left: 5px solid var(--accent-color); max-width: 1200px; font-size: 2rem; font-weight: 700; background: linear-gradient(to right, #e945601a, transparent); border-radius: 0 10px 10px 0; }
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; padding: 0 20px; max-width: 1200px; margin: 0 auto 40px auto; }
-        .game-card { background: var(--card-bg); border-radius: 20px; padding: 30px; text-align: center; transition: all 0.4s ease; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(0,0,0,0.05); }
-        .game-card:hover { transform: translateY(-10px); }
+        /* Kategori İkonları ve Renkleri */
+        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
-        .card-game { border-bottom: 5px solid var(--accent-color); box-shadow: 0 10px 25px rgba(233, 69, 96, 0.15); background-color: #fff8f8; }
-        .card-game:hover { box-shadow: 0 15px 35px rgba(233, 69, 96, 0.25); }
+        .style-Games { background-color: #d63384; }      /* Pembe */
+        .style-Videos { background-color: #dc3545; }     /* Kırmızı */
+        .style-Vocabulary { background-color: #198754; } /* Yeşil */
+        .style-Grammar { background-color: #fd7e14; }    /* Turuncu */
+        .style-Documents { background-color: #0dcaf0; }  /* Mavi */
+        .style-Slides { background-color: #6f42c1; }     /* Mor */
+
+        .section-title { border-left: 5px solid #0d6efd; padding-left: 15px; margin: 30px 0 20px 0; font-weight: bold; color: #333; }
         
-        .card-activity { border-bottom: 5px solid #3498db; box-shadow: 0 10px 25px rgba(52, 152, 219, 0.15); background-color: #f8fbff; }
-        .card-activity:hover { box-shadow: 0 15px 35px rgba(52, 152, 219, 0.25); }
-
-        .game-card h3 { color: var(--primary-color); margin: 15px 0 10px 0; font-size: 1.3rem; font-weight: 600; }
-        .game-card p { color: #636e72; font-size: 0.95rem; margin-bottom: 25px; }
-        .play-btn { display: inline-block; background-color: var(--primary-color); color: white; padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: 600; margin-top: auto; transition: background 0.3s; }
-        .play-btn:hover { background-color: var(--secondary-color); }
-        .level-badge { color: white; padding: 5px 12px; border-radius: 50px; font-size: 0.75rem; margin-bottom: 5px; display: inline-block; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; align-self: center; }
-
-        /* STATIC PAGES */
-        .static-content { max-width: 900px; margin: 40px auto; padding: 40px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
-        .contact-link { font-size: 1.5rem; color: var(--accent-color); font-weight: bold; text-decoration: none; }
-        .contact-link:hover { text-decoration: underline; }
-
-        /* FOOTER */
-        footer { background-color: var(--primary-color); color: white; text-align: center; padding: 30px 20px; margin-top: auto; }
-        footer a { color: var(--accent-color); text-decoration: none; font-weight: bold; }
+        /* Mobil Uyumlu Sekmeler */
+        .nav-pills .nav-link { border-radius: 20px; padding: 10px 25px; margin: 0 5px; color: #555; font-weight: 600; background: white; border: 1px solid #eee; }
+        .nav-pills .nav-link.active { background-color: #0d6efd; color: white; box-shadow: 0 4px 10px rgba(13,110,253,0.3); border: none; }
         
-        @media (max-width: 768px) { header { flex-direction: column; gap: 15px; padding: 15px; } .hero h2 { font-size: 2rem; } nav { flex-wrap: wrap; justify-content: center; } }
+        .unit-badge { font-size: 0.75rem; background: #eef2ff; color: #4f46e5; padding: 4px 8px; border-radius: 6px; font-weight: 600; display: inline-block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1 onclick="switchView('home')">🎓 English Game Hub</h1>
-        <nav id="navbar">
-            <a href="#" onclick="switchView('home')" class="active-link">Home</a>
-            <a href="#" onclick="switchView('games')">Games</a>
-            <a href="#" onclick="switchView('activities')">Interactive Activities</a> 
-            <a href="#" onclick="switchView('about')">About</a>
-            <a href="#" onclick="switchView('contact')">Contact</a>
-        </nav>
-    </header>
+<div class="hero-section text-center shadow">
+    <div class="container">
+        <h1 class="display-4 fw-bold"><i class="fa-solid fa-graduation-cap"></i> English Game Hub</h1>
+        <p class="lead">Learn English with Fun & Interactive Activities</p>
+    </div>
+</div>
 
-    <main>
-        <div id="view-content" class="view-section active-view">
-            <section class="hero">
-                <h2 id="hero-title">Welcome to Your Learning Playground!</h2>
-                <p id="hero-desc">Fun and interactive English games and activities, organized by grade level! 🧠</p>
-                <a href="#all-content-container" class="btn">👇 Start Learning</a>
-            </section>
+<div class="container">
+    <ul class="nav nav-pills justify-content-center mb-5" id="gradeTabs" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#grade9" type="button">9. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#grade10" type="button">10. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#grade11" type="button">11. Sınıf</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#grade12" type="button">12. Sınıf</button></li>
+    </ul>
 
-            <section id="all-content-container">
-                <h2 style="text-align: center; color: var(--primary-color); padding-top: 20px;">🔥 All Content</h2>
-                <p id="loading-message" style="text-align:center; padding:40px;">İçerikler yükleniyor... Lütfen bekleyin.</p>
-            </section>
-        </div>
+    <div class="tab-content" id="gradeContent">
+        <div class="tab-pane fade show active" id="grade9">Yükleniyor...</div>
+        <div class="tab-pane fade" id="grade10">Yükleniyor...</div>
+        <div class="tab-pane fade" id="grade11">Yükleniyor...</div>
+        <div class="tab-pane fade" id="grade12">Yükleniyor...</div>
+    </div>
+</div>
 
-        <div id="view-about" class="view-section">
-            <section class="hero" style="padding: 60px 20px;"><h2>About the Teacher</h2></section>
-            <div class="static-content">
-                <h3>👨‍🏫 Abdullah Aydınhan</h3>
-                <p>English teacher passionate about creating interactive and modern learning tools for students.</p>
-                <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-                <h3 style="color: var(--accent-color);">🎯 Purpose</h3>
-                <p>This platform is designed for English language learners to enjoy vocabulary, grammar, and speaking practice.</p>
-            </div>
-        </div>
-
-        <div id="view-contact" class="view-section">
-            <section class="hero" style="padding: 60px 20px;"><h2>Get in Touch</h2></section>
-            <div class="static-content">
-                <p>Have questions or suggestions? Feel free to reach out!</p>
-                <p>📧 Email:</p>
-                <a href="mailto:abdullahaydinhan@gmail.com" class="contact-link">abdullahaydinhan@gmail.com</a>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>© 2025 English Teacher’s Game Hub | Designed with ❤️ for students</p>
-    </footer>
+<footer class="text-center py-4 text-muted mt-5">
+    <small>&copy; 2025 English Game Hub - For Students</small>
+</footer>
 
 <script>
-    // --- AYARLAR ---
-    // NOT: Artık API kullanmıyoruz, bu yüzden limit yok!
-    
-    // Sınıf sırası (JSON karışık gelebilir, burada sıraya diziyoruz)
-    const GRADE_ORDER = ["9TH_GRADE", "10TH_GRADE", "11TH_GRADE", "12TH_GRADE"]; 
-    
-    const allContentContainer = document.getElementById('all-content-container');
-    let globalAllData = [];
-
-    // --- ÖZEL OYUN BİLGİLERİ ---
-    const customGameDetails = {
-        "9.1.R. Land of Fire PAGE 30.html": { title: "Land of Fire Reading (Page 30)", level: "Azerbaijan Activity", desc: "Azerbaycan okuma anlama pratiği.", badgeColor: "#f39c12" },
-        "9.1.R. Getting Ready for a Safer Digital World Page 34.html": { title: "Safer Digital World (Page 34)", level: "Cybersecurity Quiz", desc: "Siber güvenlik kelime ve okuma pratiği.", badgeColor: "#e94560" },
-        "9.1.R. Somewhere Far Away PAGE 32.html": { title: "Somewhere Far Away Reading", level: "Chile Activity", desc: "Şili ile ilgili okuma ve anlama pratiği.", badgeColor: "#00b894" },
+    // --- KONFİGÜRASYON ---
+    // Her türün ikonu ve görünen adı
+    const TYPE_CONFIG = {
+        'Games': { icon: 'fa-gamepad', title: '🎮 Interactive Games' },
+        'Videos': { icon: 'fa-youtube', title: '🎬 Watch & Learn' },
+        'Vocabulary': { icon: 'fa-book-open', title: '📖 Vocabulary Lists' },
+        'Grammar': { icon: 'fa-pen-nib', title: '✍️ Grammar Exercises' },
+        'Documents': { icon: 'fa-file-pdf', title: '📄 Worksheets & PDFs' },
+        'Slides': { icon: 'fa-person-chalkboard', title: '📊 Presentations' }
     };
 
-    // --- GÖRÜNÜM DEĞİŞTİRME ---
-    window.switchView = function(viewName) {
-        document.querySelectorAll('nav a').forEach(el => el.classList.remove('active-link'));
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
-
-        if(viewName === 'about') {
-            document.getElementById('view-about').classList.add('active-view');
-            document.querySelectorAll('nav a')[3].classList.add('active-link');
-        } else if(viewName === 'contact') {
-            document.getElementById('view-contact').classList.add('active-view');
-            document.querySelectorAll('nav a')[4].classList.add('active-link');
-        } else {
-            document.getElementById('view-content').classList.add('active-view');
-            if(viewName === 'home') {
-                displayContent('All');
-                document.querySelectorAll('nav a')[0].classList.add('active-link');
-            } else if (viewName === 'games') {
-                displayContent('Games');
-                document.querySelectorAll('nav a')[1].classList.add('active-link');
-            } else if (viewName === 'activities') {
-                displayContent('Interactive_Activities');
-                document.querySelectorAll('nav a')[2].classList.add('active-link');
-            }
-        }
-    };
-
-    // --- JSON YÜKLEME (OTOMASYON SONUCU) ---
-    async function loadAllContent() {
-        document.getElementById('loading-message').style.display = 'block';
-        try {
-            // ROBOTUN OLUŞTURDUĞU DOSYAYI OKUYORUZ
-            // Cache (önbellek) sorununu önlemek için sonuna tarih ekliyoruz
-            const response = await fetch('games_data.json?t=' + new Date().getTime());
+    // Verileri Çek
+    fetch('games_data.json')
+        .then(response => response.json())
+        .then(data => {
+            // Verileri tersten sırala (En yeni en üstte olması için)
+            // GitHub Action normalde dosya adina göre vs. sıralar, array'in sonu genelde en yenidir.
+            // Biz ters çevirerek en son işleneni en başa alıyoruz.
+            const reversedData = data.reverse();
             
-            if (!response.ok) throw new Error('Veri dosyası henüz oluşmadı. Lütfen 1-2 dakika bekleyip sayfayı yenileyin.');
-            
-            const data = await response.json();
-            globalAllData = data;
-            displayContent('All'); 
+            renderGrade('9TH_GRADE', 'grade9', reversedData);
+            renderGrade('10TH_GRADE', 'grade10', reversedData);
+            renderGrade('11TH_GRADE', 'grade11', reversedData);
+            renderGrade('12TH_GRADE', 'grade12', reversedData);
+        })
+        .catch(error => console.error('Hata:', error));
 
-        } catch (error) {
-            console.error('Hata:', error);
-            allContentContainer.innerHTML = `<p style="text-align:center; color:#e94560; padding:20px;">⚠️ İçerik listesi hazırlanıyor...<br>Lütfen sayfayı 1 dakika sonra yenileyin.</p>`;
-        } finally {
-            const msg = document.getElementById('loading-message');
-            if(msg) msg.style.display = 'none';
-        }
-    }
-
-    function displayContent(filterSource) {
-        const heroTitle = document.getElementById('hero-title');
-        const sectionHeader = document.querySelector('#all-content-container h2');
-        let displayData = globalAllData;
-
-        if (filterSource === 'Games') {
-            heroTitle.textContent = "Game Zone 🎮";
-            sectionHeader.textContent = "🎮 Games by Grade Level";
-            displayData = globalAllData.filter(item => item.source === 'Games');
-        } else if (filterSource === 'Interactive_Activities') {
-            heroTitle.textContent = "Interactive Activities 🧠";
-            sectionHeader.textContent = "🧩 Interactive Activities by Grade Level";
-            displayData = globalAllData.filter(item => item.source === 'Interactive_Activities');
-        } else { 
-            heroTitle.textContent = "Welcome to Your Learning Playground!";
-            sectionHeader.textContent = "🔥 All Content by Grade Level";
-        }
+    function renderGrade(gradeKey, containerId, allData) {
+        const container = document.getElementById(containerId);
+        // Sadece bu sınıfın ve aktif olan verilerini filtrele
+        const gradeItems = allData.filter(item => item.grade === gradeKey && item.isVisible !== false);
         
-        allContentContainer.innerHTML = '';
-        allContentContainer.appendChild(sectionHeader);
-
-        if (displayData.length === 0 && filterSource !== 'All') {
-            allContentContainer.innerHTML += `<p style="text-align:center; color:#999; padding:40px;">Bu kategoride henüz içerik bulunamadı.</p>`;
+        if (gradeItems.length === 0) {
+            container.innerHTML = `<div class="alert alert-light text-center">Bu sınıf için henüz içerik eklenmemiş.</div>`;
             return;
         }
 
-        // Gruplama
-        const groupedData = displayData.reduce((acc, item) => {
-            const gradeKey = item.grade; 
-            acc[gradeKey] = acc[gradeKey] || [];
-            acc[gradeKey].push(item);
-            return acc;
-        }, {});
+        let htmlContent = "";
 
-        // Sınıf Sırasına Göre Yazdır
-        GRADE_ORDER.forEach(grade => {
-            const gradeItems = groupedData[grade];
-            if (!gradeItems || gradeItems.length === 0) return; 
-
-            const gradeTitle = document.createElement('h2');
-            gradeTitle.className = 'grade-section-title';
-            gradeTitle.textContent = grade.replace(/_/g, ' ').toUpperCase(); 
-            allContentContainer.appendChild(gradeTitle);
-
-            const gamesGrid = document.createElement('div');
-            gamesGrid.className = 'games-grid';
-
-            // İsim Sıralaması
-            gradeItems.sort((a, b) => a.name.localeCompare(b.name));
-
-            gradeItems.forEach(item => {
-                let fileName = item.name;
-                let gameUrl = item.path; 
-                let sourceFolder = item.source;
-
-                let title = fileName.replace('.html', '').replace(/[-_]/g, ' ').trim();
-                let desc = "";
-                let level = "";
-                let badgeStyle = ""; 
-                let cardClass = ""; 
-                let icon = "";
-
-                if (sourceFolder === "Games") {
-                    level = "Games"; 
-                    desc = "Interactive game.";
-                    cardClass = "card-game";
-                    badgeStyle = "background: var(--accent-color);";
-                    icon = "🎮";
-                } else if (sourceFolder === "Interactive_Activities") {
-                    level = "Interactive Activity"; 
-                    desc = "Reading & Vocab practice.";
-                    cardClass = "card-activity"; 
-                    badgeStyle = "background: #3498db;";
-                    icon = "🧩";
-                }
-
-                if (!customGameDetails[fileName] && !customGameDetails[title]) {
-                    title = title.toUpperCase();
-                }
-
-                const lookupKey = fileName; 
-                if (customGameDetails[lookupKey]) {
-                    const details = customGameDetails[lookupKey];
-                    title = details.title;
-                    desc = details.desc;
-                    level = details.level || level; 
-                    if (details.badgeColor) badgeStyle = `background: ${details.badgeColor};`;
-                }
-
-                const cardHTML = `
-                <div class="game-card ${cardClass}">
-                    <div>
-                        <span class="level-badge" style="${badgeStyle}">${level}</span>
-                        <h3>${icon} ${title}</h3>
-                        <p>${desc}</p>
-                    </div>
-                    <a href="${gameUrl}" class="play-btn">Play Now ➡️</a>
-                </div>
-                `;
-                gamesGrid.innerHTML += cardHTML;
-            });
-            allContentContainer.appendChild(gamesGrid);
+        // TURLERE GÖRE GRUPLA
+        // Tanımlı sıraya göre ekrana bas (Games önce, sonra Video...)
+        const orderedTypes = ['Games', 'Videos', 'Vocabulary', 'Grammar', 'Slides', 'Documents'];
+        
+        orderedTypes.forEach(type => {
+            // Bu türdeki içerikleri bul
+            const itemsInType = gradeItems.filter(item => item.source === type);
+            
+            if (itemsInType.length > 0) {
+                // Başlık ekle
+                const config = TYPE_CONFIG[type] || { icon: 'fa-folder', title: type };
+                htmlContent += `<h3 class="section-title"><i class="fa-solid ${config.icon}"></i> ${config.title}</h3>`;
+                
+                // Grid başlat
+                htmlContent += `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">`;
+                
+                itemsInType.forEach(item => {
+                    const badge = item.unit ? `<span class="unit-badge">${item.unit}</span>` : '';
+                    const star = item.isFeatured ? `<i class="fa-solid fa-star text-warning ms-1"></i>` : '';
+                    
+                    htmlContent += `
+                    <div class="col">
+                        <a href="${item.path}" class="text-decoration-none text-dark" target="_blank">
+                            <div class="card game-card shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="icon-box style-${type}">
+                                            <i class="fa-solid ${config.icon}"></i>
+                                        </div>
+                                        ${star}
+                                    </div>
+                                    ${badge}
+                                    <h5 class="card-title fw-bold mt-2">${item.title}</h5>
+                                    <p class="card-text text-muted small">${item.description || 'Click to open resource.'}</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>`;
+                });
+                
+                htmlContent += `</div>`; // Grid bitir
+            }
         });
-    }
+        
+        // Diğer (Tanımsız) türler varsa onları da sona ekle
+        const otherItems = gradeItems.filter(item => !orderedTypes.includes(item.source));
+        if(otherItems.length > 0) {
+             htmlContent += `<h3 class="section-title">Other Activities</h3><div class="row row-cols-1 row-cols-md-3 g-4">`;
+             otherItems.forEach(item => { /* Standart kart kodu... */ });
+             htmlContent += `</div>`;
+        }
 
-    document.addEventListener('DOMContentLoaded', loadAllContent);
+        container.innerHTML = htmlContent;
+    }
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
