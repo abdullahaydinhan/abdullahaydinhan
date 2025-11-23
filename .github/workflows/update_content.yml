@@ -1,0 +1,53 @@
+name: Update Content List
+
+on:
+  push:
+    paths:
+      - 'Games/**'
+      - 'Interactive_Activities/**'
+      # Gelecekte 'Quizzes' eklerseniz buraya: - 'Quizzes/**' ekleyin.
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Generate Games JSON
+      run: |
+        echo "[" > games_data.json
+        FIRST=true
+        
+        # 1. GAMES KLASÖRÜNÜ TARA (Klasör içindeki index.html'leri bulur)
+        if [ -d "Games" ]; then
+          find Games -mindepth 2 -name "index.html" | while read file; do
+            dir=$(dirname "$file")
+            parent=$(basename "$(dirname "$dir")") # Sınıf (9TH_GRADE)
+            name=$(basename "$dir")                # Oyun Adı (Milyoner)
+            
+            if [ "$FIRST" = true ]; then FIRST=false; else echo "," >> games_data.json; fi
+            echo "{\"name\": \"$name\", \"path\": \"$file\", \"type\": \"dir\", \"grade\": \"$parent\", \"source\": \"Games\"}" >> games_data.json
+          done
+        fi
+
+        # 2. INTERACTIVE ACTIVITIES KLASÖRÜNÜ TARA (Direkt .html dosyalarını bulur)
+        if [ -d "Interactive_Activities" ]; then
+          find Interactive_Activities -name "*.html" | while read file; do
+            parent=$(basename "$(dirname "$file")") # Sınıf (9TH_GRADE)
+            name=$(basename "$file")                # Dosya Adı (Unit1.html)
+            
+            if [ "$FIRST" = true ]; then FIRST=false; else echo "," >> games_data.json; fi
+            echo "{\"name\": \"$name\", \"path\": \"$file\", \"type\": \"file\", \"grade\": \"$parent\", \"source\": \"Interactive_Activities\"}" >> games_data.json
+          done
+        fi
+        
+        echo "]" >> games_data.json
+
+    - name: Commit and Push JSON
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add games_data.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update content list 🤖" && git push)
