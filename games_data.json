@@ -12,18 +12,6 @@
     "isVisible": false
   },
   {
-    "path": "Games/9TH_GRADE/9.1.Jeopardy/index.html",
-    "name": "9.1.Jeopardy",
-    "title": "9.1.Jeopardy",
-    "description": "Click to view file.",
-    "grade": "9TH_GRADE",
-    "source": "Games",
-    "unit": "",
-    "badgeColor": "bg-primary",
-    "isFeatured": false,
-    "isVisible": true
-  },
-  {
     "path": "Games/9TH_GRADE/Milyoner9_1/index.html",
     "name": "Milyoner9_1",
     "title": "Milyoner9 1",
