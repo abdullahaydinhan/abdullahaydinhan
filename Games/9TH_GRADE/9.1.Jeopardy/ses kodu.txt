@@ -1,3 +1,0 @@
-<audio id="tick-sound" src="tick.mp3"></audio>
-<audio id="correct-sound" src="correct.mp3"></audio>
-<audio id="wrong-sound" src="wrong.mp3"></audio>
