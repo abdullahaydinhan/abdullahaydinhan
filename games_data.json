@@ -48,18 +48,6 @@
     "isVisible": true
   },
   {
-    "path": "Interactive_Activities/10TH_GRADE/Suleyman_The_Magnificent.html",
-    "name": "Suleyman_The_Magnificent.html",
-    "title": "Suleyman The Magnificent",
-    "description": "Click to view file.",
-    "grade": "10TH_GRADE",
-    "source": "Interactive_Activities",
-    "unit": "",
-    "badgeColor": "bg-info",
-    "isFeatured": false,
-    "isVisible": true
-  },
-  {
     "path": "Interactive_Activities/10TH_GRADE/Unforgettable_Hero.html",
     "name": "Unforgettable_Hero.html",
     "title": "Unforgettable Hero",
