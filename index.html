@@ -15,109 +15,139 @@
         .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; }
         .nav-link.active { color: #0d6efd !important; }
 
-        /* SOL YAN MENÜ (SIDEBAR) - GÜNCELLENDİ */
+        /* --- SOL YAN MENÜ (DÜZELTİLMİŞ VE GELİŞTİRİLMİŞ) --- */
         .left-sidebar {
             position: fixed;
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 1040;
+            z-index: 1050; /* En üstte */
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
         .grade-menu-item {
-            position: relative;
-            background-color: #343a40; /* Koyu renk */
+            position: relative; /* Submenu buna göre hizalanacak */
+            background-color: #343a40;
             color: white;
-            width: 50px; /* Kapalıyken sadece ikon genişliği */
-            height: 50px;
-            border-radius: 0 12px 12px 0; /* Sağ köşeleri yuvarla */
+            width: 60px; /* Sabit genişlik */
+            height: 60px;
+            border-radius: 0 15px 15px 0;
             display: flex;
             align-items: center;
-            justify-content: center; /* İkonu ortala */
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Havalı animasyon */
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
             font-weight: bold;
-            overflow: hidden;
-            white-space: nowrap;
+            z-index: 1051;
         }
 
-        .grade-menu-item span {
-            display: none; /* Yazı başta gizli */
-            margin-left: 10px;
+        /* Sınıf Yazısı (Hover'da Görünür) */
+        .grade-label {
+            position: absolute;
+            left: 60px;
+            background-color: #0d6efd;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 0 5px 5px 0;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1050;
         }
 
         .grade-menu-item:hover {
-            width: 160px; /* Üzerine gelince uza */
             background-color: #0d6efd;
-            justify-content: flex-start; /* Yazıyı sola hizala */
-            padding-left: 15px;
+            width: 70px; /* Hafif uzama efekti */
         }
 
-        .grade-menu-item:hover span {
-            display: inline-block; /* Yazıyı göster */
+        .grade-menu-item:hover .grade-label {
+            opacity: 1;
+            visibility: visible;
+            left: 70px;
         }
 
-        /* Sınıf Menüsü İkonları (Yuvarlaklar) */
-        .grade-icon {
-            font-size: 1.2rem;
-            font-weight: 800;
-            min-width: 25px;
-            text-align: center;
-        }
-
-        /* Açılır Alt Menü (Submenu) */
+        /* AÇILIR MENÜ (SUBMENU) */
         .grade-submenu {
-            display: none;
+            display: none; /* Başlangıçta gizli */
             position: absolute;
-            left: 100%; /* Butonun sağında açıl */
+            left: 75px; /* Butonun sağında */
             top: 0;
             background: white;
-            border-radius: 10px;
-            box-shadow: 5px 5px 20px rgba(0,0,0,0.15);
-            width: 200px;
-            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 5px 5px 25px rgba(0,0,0,0.2);
+            width: 220px;
+            padding: 15px;
             text-align: left;
-            margin-left: 10px; /* Biraz boşluk bırak */
+            border: 1px solid #eee;
+            z-index: 1060;
         }
 
+        /* Üçgen Ok İşareti */
+        .grade-submenu::before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: -10px;
+            border-width: 10px 10px 10px 0;
+            border-style: solid;
+            border-color: transparent white transparent transparent;
+        }
+
+        /* Hover Tetikleyici (Hover anında göster) */
         .grade-menu-item:hover .grade-submenu {
             display: block;
-            animation: fadeInRight 0.3s ease;
+            animation: fadeInSlide 0.3s ease;
         }
 
-        /* ÖZELLEŞTİRİLMİŞ SINIF ETİKETLERİ (BADGES) - YENİ */
-        .grade-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 5px 12px;
+        @keyframes fadeInSlide {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Menü Linkleri */
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            color: #555;
+            text-decoration: none;
             border-radius: 8px;
-            color: white;
-            font-weight: 700;
-            font-size: 0.75rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            letter-spacing: 0.5px;
-            z-index: 2;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.2s;
+            margin-bottom: 2px;
         }
-        
-        /* Her Sınıf İçin Özel Renkler */
-        .badge-9 { background: linear-gradient(45deg, #00c6ff, #0072ff); } /* Mavi */
-        .badge-10 { background: linear-gradient(45deg, #11998e, #38ef7d); } /* Yeşil */
-        .badge-11 { background: linear-gradient(45deg, #fce38a, #f38181); color: #333 !important; } /* Turuncu/Sarı */
-        .badge-12 { background: linear-gradient(45deg, #ff416c, #ff4b2b); } /* Kırmızı */
+        .submenu-link:hover { background-color: #f0f7ff; color: #0d6efd; transform: translateX(5px); }
+        .submenu-link i { width: 25px; } /* İkon genişliği sabitleme */
 
-        @keyframes fadeInRight { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        /* Sınıf İkonu */
+        .grade-circle {
+            width: 35px;
+            height: 35px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
 
-        /* KARTLAR */
+        /* ÖZELLEŞTİRİLMİŞ SINIF ETİKETLERİ (KARTLAR İÇİN) */
+        .grade-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 8px; color: white; font-weight: 700; font-size: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
+        .badge-9 { background: linear-gradient(45deg, #00c6ff, #0072ff); }
+        .badge-10 { background: linear-gradient(45deg, #11998e, #38ef7d); }
+        .badge-11 { background: linear-gradient(45deg, #fce38a, #f38181); color: #333 !important; }
+        .badge-12 { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
+
+        /* DİĞER STİLLER */
         .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; cursor: pointer; }
         .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #0d6efd; }
         .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
-        /* İKON RENKLERİ */
         .icon-Games { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #d63384; }
         .icon-Interactive_Activities { background-color: #0d6efd; }
         .icon-Videos { background-color: #dc3545; }
@@ -126,15 +156,12 @@
         .icon-Slides { background-color: #6f42c1; }
         .icon-Documents { background-color: #0dcaf0; }
         
-        /* DİĞER CSS */
         .view-section { display: none; animation: fadeIn 0.5s ease; }
         .view-section.active-view { display: block; }
         .hero-section { background: linear-gradient(120deg, #2980b9, #8e44ad); color: white; padding: 60px 0; border-radius: 0 0 50px 50px; margin-bottom: 40px; }
+        
         .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
         .nav-pills .nav-link.active { background-color: #0d6efd !important; border-color: #0d6efd !important; color: #ffffff !important; transform: scale(1.05); box-shadow: 0 4px 15px rgba(13,110,253,0.3); }
-        .unit-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; background: #eef2ff; color: #4f46e5; padding: 5px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 8px; }
-        .submenu-link { display: block; padding: 8px 10px; color: #333; text-decoration: none; border-radius: 5px; font-size: 0.9rem; transition: 0.2s; }
-        .submenu-link:hover { background-color: #f0f7ff; color: #0d6efd; padding-left: 15px; }
     </style>
 </head>
 <body>
@@ -147,7 +174,7 @@
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item"><a class="nav-link active" id="nav-home" onclick="switchView('home')">Home</a></li>
                 <li class="nav-item"><a class="nav-link" id="nav-Games" onclick="switchView('Games')">Games</a></li>
-                <li class="nav-item"><a class="nav-link" id="nav-Interactive_Activities" onclick="switchView('Interactive_Activities')">Interactive Activities</a></li>
+                <li class="nav-item"><a class="nav-link" id="nav-Interactive_Activities" onclick="switchView('Interactive_Activities')">Activities</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Study Materials</a>
                     <ul class="dropdown-menu border-0 shadow">
@@ -166,42 +193,63 @@
 </nav>
 
 <div class="left-sidebar">
-    <div class="grade-menu-item" title="9th Grade Menu">
-        <div class="grade-icon">9</div> <span>9TH GRADE</span>
+    <div class="grade-menu-item">
+        <div class="grade-circle">9</div>
+        <span class="grade-label">9th Grade</span>
         <div class="grade-submenu">
             <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">9th Grade Content</div>
-            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
-            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
-            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
-            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube me-2 text-danger"></i> Videos</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open text-success"></i> Vocabulary</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Grammar')"><i class="fa-solid fa-pen-nib text-warning"></i> Grammar</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube text-danger"></i> Videos</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Slides')"><i class="fa-solid fa-person-chalkboard text-primary"></i> Slides</a>
+            <a href="#" class="submenu-link" onclick="quickNav('9TH_GRADE', 'Documents')"><i class="fa-solid fa-file-pdf text-info"></i> Documents</a>
         </div>
     </div>
-    <div class="grade-menu-item" title="10th Grade Menu">
-        <div class="grade-icon">10</div> <span>10TH GRADE</span>
+
+    <div class="grade-menu-item">
+        <div class="grade-circle">10</div>
+        <span class="grade-label">10th Grade</span>
         <div class="grade-submenu">
             <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">10th Grade Content</div>
-            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
-            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
-            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
-            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube me-2 text-danger"></i> Videos</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open text-success"></i> Vocabulary</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Grammar')"><i class="fa-solid fa-pen-nib text-warning"></i> Grammar</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube text-danger"></i> Videos</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Slides')"><i class="fa-solid fa-person-chalkboard text-primary"></i> Slides</a>
+            <a href="#" class="submenu-link" onclick="quickNav('10TH_GRADE', 'Documents')"><i class="fa-solid fa-file-pdf text-info"></i> Documents</a>
         </div>
     </div>
-    <div class="grade-menu-item" title="11th Grade Menu">
-        <div class="grade-icon">11</div> <span>11TH GRADE</span>
+
+    <div class="grade-menu-item">
+        <div class="grade-circle">11</div>
+        <span class="grade-label">11th Grade</span>
         <div class="grade-submenu">
             <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">11th Grade Content</div>
-            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
-            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
-            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open text-success"></i> Vocabulary</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Grammar')"><i class="fa-solid fa-pen-nib text-warning"></i> Grammar</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube text-danger"></i> Videos</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Slides')"><i class="fa-solid fa-person-chalkboard text-primary"></i> Slides</a>
+            <a href="#" class="submenu-link" onclick="quickNav('11TH_GRADE', 'Documents')"><i class="fa-solid fa-file-pdf text-info"></i> Documents</a>
         </div>
     </div>
-    <div class="grade-menu-item" title="12th Grade Menu">
-        <div class="grade-icon">12</div> <span>12TH GRADE</span>
+
+    <div class="grade-menu-item">
+        <div class="grade-circle">12</div>
+        <span class="grade-label">12th Grade</span>
         <div class="grade-submenu">
             <div class="text-muted small mb-2 border-bottom pb-1 fw-bold">12th Grade Content</div>
-            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad me-2 text-danger"></i> Games</a>
-            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code me-2 text-primary"></i> Activities</a>
-            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open me-2 text-success"></i> Vocabulary</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Games')"><i class="fa-solid fa-gamepad text-danger"></i> Games</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code text-primary"></i> Activities</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Vocabulary')"><i class="fa-solid fa-book-open text-success"></i> Vocabulary</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Grammar')"><i class="fa-solid fa-pen-nib text-warning"></i> Grammar</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Videos')"><i class="fa-solid fa-youtube text-danger"></i> Videos</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Slides')"><i class="fa-solid fa-person-chalkboard text-primary"></i> Slides</a>
+            <a href="#" class="submenu-link" onclick="quickNav('12TH_GRADE', 'Documents')"><i class="fa-solid fa-file-pdf text-info"></i> Documents</a>
         </div>
     </div>
 </div>
@@ -347,8 +395,7 @@
         const displayTitle = item.title || item.name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
         const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
         
-        // Sınıfa Göre Renkli Badge Oluştur
-        const gradeNum = item.grade.replace('TH_GRADE', ''); // '9', '10' vb.
+        const gradeNum = item.grade.replace('TH_GRADE', ''); 
         const gradeBadgeClass = `badge-${gradeNum}`;
         const gradeLabel = `<span class="grade-badge ${gradeBadgeClass}">${gradeNum}TH</span>`;
         
