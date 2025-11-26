@@ -5,7 +5,8 @@ on:
     paths:
       - 'Games/**'
       - 'Interactive_Activities/**'
-      - 'Vocabulary/**'  # Yeni klasör eklendi
+      - 'Vocabulary/**'
+      - 'Videos/**' # ARTIK VİDEOLARI DA TAKİP EDECEK
   workflow_dispatch:
 
 jobs:
@@ -16,16 +17,18 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Generate JSON with MULTI-FILE Support
+    - name: Generate JSON with VIDEOS Support
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
           const path = require('path');
 
+          // KLASÖR TANIMLARI
           const gamesDir = 'Games';
           const activitiesDir = 'Interactive_Activities';
-          const vocabDir = 'Vocabulary'; // Yeni Bölüm
+          const vocabDir = 'Vocabulary';
+          const videosDir = 'Videos'; // YENİ EKLENDİ
           const outputFile = 'games_data.json';
           
           let results = [];
@@ -43,21 +46,21 @@ jobs:
           function createEntry(realPath, name, defaultGrade, defaultSource) {
              const old = existingData[realPath];
              
-             // Dosya uzantısını temizle (html, pdf, docx, xlsx)
              const cleanName = name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
              const finalTitle = (old && old.title) ? old.title : cleanName;
              const finalSource = (old && old.source) ? old.source : defaultSource;
 
-             // Varsayılan renk ayarı (Vocabulary ise Yeşil)
+             // Varsayılan renkler
              let defColor = 'bg-primary';
              if (finalSource === 'Interactive_Activities') defColor = 'bg-info';
              if (finalSource === 'Vocabulary') defColor = 'bg-success';
+             if (finalSource === 'Videos') defColor = 'bg-danger'; // Videolar Kırmızı
 
              return {
                 path: realPath,
                 name: name,
                 title: finalTitle,
-                description: (old && old.description) ? old.description : "Click to view file.",
+                description: (old && old.description) ? old.description : "Click to view content.",
                 grade: (old && old.grade) ? old.grade : defaultGrade,
                 source: finalSource,
                 unit: (old && old.unit) ? old.unit : "",
@@ -67,7 +70,7 @@ jobs:
              };
           }
 
-          // 1. GAMES TARAMASI
+          // 1. GAMES
           if (fs.existsSync(gamesDir)) {
             fs.readdirSync(gamesDir).forEach(grade => {
               const gradePath = path.join(gamesDir, grade);
@@ -83,7 +86,7 @@ jobs:
             });
           }
 
-          // 2. INTERACTIVE ACTIVITIES TARAMASI (Sadece HTML)
+          // 2. INTERACTIVE ACTIVITIES
           if (fs.existsSync(activitiesDir)) {
             fs.readdirSync(activitiesDir).forEach(grade => {
               const gradePath = path.join(activitiesDir, grade);
@@ -98,16 +101,30 @@ jobs:
             });
           }
 
-          // 3. VOCABULARY TARAMASI (HTML, PDF, DOCX, XLSX)
+          // 3. VOCABULARY
           if (fs.existsSync(vocabDir)) {
             fs.readdirSync(vocabDir).forEach(grade => {
               const gradePath = path.join(vocabDir, grade);
               if (fs.statSync(gradePath).isDirectory()) {
                 fs.readdirSync(gradePath).forEach(file => {
-                  // Kabul edilen uzantılar
                   if (file.match(/\.(html|pdf|docx|xlsx)$/i)) {
                     const fullPath = `${vocabDir}/${grade}/${file}`;
                     results.push(createEntry(fullPath, file, grade, 'Vocabulary'));
+                  }
+                });
+              }
+            });
+          }
+
+          // 4. VIDEOS (YENİ BÖLÜM - HTML DOSYALARINI TARAR)
+          if (fs.existsSync(videosDir)) {
+            fs.readdirSync(videosDir).forEach(grade => {
+              const gradePath = path.join(videosDir, grade);
+              if (fs.statSync(gradePath).isDirectory()) {
+                fs.readdirSync(gradePath).forEach(file => {
+                  if (file.endsWith('.html')) { // Video wrap dosyaları html olur
+                    const fullPath = `${videosDir}/${grade}/${file}`;
+                    results.push(createEntry(fullPath, file, grade, 'Videos'));
                   }
                 });
               }
@@ -121,4 +138,4 @@ jobs:
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
         git add games_data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Updated Content List with Vocabulary 📚" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Updated Content: Added Videos Support 🎬" && git push)
