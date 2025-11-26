@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="appTitle">English Word Matching Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes confetti { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); 
+            background-size: 400% 400%; 
+            animation: gradientShift 15s ease infinite; 
+            margin: 0; 
+            padding: 10px; 
+            min-height: 100vh; 
+            position: relative; 
+            overflow-x: hidden;
+        }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; animation: confetti 3s linear; pointer-events: none; }
+        
+        /* HEADER UI CONTROLS */
+        .ui-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 2000;
+        }
+
+        .icon-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .icon-button:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.3); }
+
+        /* GAME LAYOUT */
+        .game-header {
+            display: flex; justify-content: center; align-items: center; margin-bottom: 15px;
+            margin-top: 50px; /* Space for top buttons */
+        }
+
+        #timer {
+            text-align: center; color: white; font-size: 20px; font-weight: 700;
+            padding: 10px 25px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .container { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 0 auto; 
+            max-width: 1100px; 
+            gap: 20px; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        .word-list { width: 48%; display: flex; flex-direction: column; gap: 10px; }
+        
+        .word {
+            width: 100%; padding: 15px; position: relative; display: flex; align-items: center; justify-content: center; text-align: center;
+            font-size: 16px; font-weight: 600; cursor: pointer; user-select: none; touch-action: manipulation;
+            transition: all 0.2s; min-height: 50px; border-radius: 12px;
+            backdrop-filter: blur(5px); overflow: hidden; animation: fadeInUp 0.4s ease;
+            word-break: break-word; hyphens: auto; line-height: 1.3;
+        }
+        
+        #englishWords .word {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9));
+            box-shadow: 0 4px 10px rgba(255, 165, 0, 0.3); color: #2d2d2d;
+        }
+        
+        #turkishWords .word {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); color: white;
+        }
+        
+        .word.selected {
+            border: 3px solid #FF1493 !important; transform: scale(1.02) !important;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.6) !important;
+        }
+        
+        .word.matched { opacity: 0.5; pointer-events: none; filter: grayscale(0.5); transform: scale(0.95); }
+        
+        .final-correct-match { background: #10b981 !important; border: 2px solid #059669 !important; }
+        .final-wrong-match { background: #ef4444 !important; border: 2px solid #b91c1c !important; }
+
+        /* GEMINI & RESULTS */
+        #geminiAssistant {
+            margin: 20px auto; padding: 20px; background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px); border-radius: 15px; max-width: 600px;
+            color: white; border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #geminiResponse {
+            margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); 
+            border-radius: 8px; font-size: 14px; line-height: 1.5;
+        }
+
+        .assistant-actions { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+        .assistant-actions button, .assistant-actions select {
+            flex: 1; padding: 10px; border-radius: 8px; border: none; font-size: 13px;
+        }
+
+        #result { text-align: center; color: white; margin-top: 20px; }
+
+        /* MODALS */
+        .modal {
+            display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+        }
+
+        .modal-content {
+            background: #2d3748; color: white; margin: 20px; padding: 25px;
+            border-radius: 20px; width: 90%; max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 90vh; overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .modal-header h2 { font-size: 20px; color: #fbbf24; }
+        .close-modal { font-size: 28px; cursor: pointer; color: #aaa; }
+
+        /* SETTINGS FORM */
+        .setting-item { margin-bottom: 15px; }
+        .setting-item label { display: block; margin-bottom: 5px; font-size: 14px; color: #a0aec0; }
+        .setting-item select, .setting-item input[type="file"] {
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px; color: white; font-size: 15px;
+        }
+
+        .btn-primary {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981, #059669);
+            color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px;
+            cursor: pointer; margin-top: 10px;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 15px;
+            color: white; border-radius: 8px; cursor: pointer; font-size: 13px;
+        }
+
+        #createGameSection {
+            background: rgba(236, 72, 153, 0.1); border: 1px dashed rgba(236, 72, 153, 0.5);
+            padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center;
+        }
+
+        #footer {
+            text-align: center; padding: 10px; font-size: 11px; color: rgba(255,255,255,0.6);
+            position: fixed; bottom: 0; left: 0; width: 100%; pointer-events: none;
+        }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            .container { 
+                flex-direction: row !important; /* Force side by side on mobile */
+                gap: 8px;
+            }
+            .word {
+                font-size: 11px; /* Smaller text */
+                padding: 5px;
+                min-height: 45px;
+            }
+            .word-list { width: 49%; } /* Tighter columns */
+            .game-header { margin-top: 60px; }
+            #timer { font-size: 16px; padding: 8px 15px; }
+            .ui-controls { top: 5px; right: 5px; gap: 5px; }
+            .icon-button { width: 40px; height: 40px; font-size: 18px; }
+            #geminiAssistant { margin: 10px; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="ui-controls">
+        <button id="fullscreenBtn" class="icon-button" title="Fullscreen">⛶</button>
+        <button id="infoBtn" class="icon-button" title="How to Play">ℹ️</button>
+        <button id="settingsBtn" class="icon-button" title="Settings" style="background: rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5);">⚙️</button>
+    </div>
+
+    <div id="gameScreen">
+        <div class="game-header">
+            <div id="timer">Time: 0</div>
+        </div>
+        
+        <div class="container">
+            <div id="englishWords" class="word-list"></div>
+            <div id="turkishWords" class="word-list"></div>
+        </div>
+
+        <div id="result"></div>
+
+        <div id="geminiAssistant" style="display: none;">
+            <h3>✨ Assistant</h3>
+            <div class="assistant-actions">
+                <select id="wrongWordsSelect"></select>
+                <button id="explainWordButton" class="btn-secondary">Define</button>
+                <button id="exampleSentenceButton" class="btn-secondary">Example</button>
+            </div>
+            <div id="geminiLoading" style="display: none; margin-top:5px; font-size:12px;">Thinking...</div>
+            <div id="geminiResponse"></div>
+        </div>
+        
+        <div id="postGameActions" style="text-align: center; margin-top: 20px; display: none;">
+            <button onclick="startGame('new')" class="btn-secondary" style="background: #10b981; padding: 12px 25px; font-size: 16px;">🎮 Play Again</button>
+            <button id="showResultsBtn" class="btn-secondary" style="padding: 12px 25px; font-size: 16px;">📊 Results</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Game Settings</h2>
+                <span class="close-modal" id="closeSettings">&times;</span>
+            </div>
+
+            <div class="setting-item">
+                <label>📂 Upload Word List (Excel)</label>
+                <input type="file" id="excelFile" accept=".xlsx,.xls">
+                <div id="loadingMessage" style="font-size: 12px; margin-top: 5px; color: #10b981;"></div>
+            </div>
+
+            <div id="createGameSection" style="display: none;">
+                <p style="color: white; font-size: 13px; margin-bottom: 8px;">Save current list as a new App:</p>
+                <button id="createHtmlButton" class="btn-secondary" style="width: 100%; border-color: #ec4899; background: rgba(236, 72, 153, 0.2);">💾 Download Standalone Game</button>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <div class="setting-item" style="flex: 1;">
+                    <label>Word Count</label>
+                    <select id="wordCountSelect">
+                        <option value="10">10 Pairs</option>
+                        <option value="15">15 Pairs</option>
+                        <option value="20">20 Pairs</option>
+                        <option value="30">30 Pairs</option>
+                    </select>
+                </div>
+                <div class="setting-item" style="flex: 1;">
+                    <label>Sound</label>
+                    <button id="soundToggle" class="btn-secondary" style="width: 100%; height: 45px; margin-top: 0;">🔊 On</button>
+                </div>
+            </div>
+
+            <button id="applySettingsBtn" class="btn-primary">✅ Apply & Restart Game</button>
+        </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>How to Play</h2><span class="close-modal" id="closeInfo">&times;</span></div>
+            <p>1. Match English words with Turkish translations.</p>
+            <p>2. Green = Correct, Red = Wrong.</p>
+            <p>3. One extra Turkish word has no match!</p>
+            <p>4. Use the ⚙️ Gear icon to upload your own words.</p>
+        </div>
+    </div>
+
+    <div id="resultsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>📊 History</h2><span class="close-modal" id="closeResults">&times;</span></div>
+            <div id="resultsList" style="max-height: 300px; overflow-y: auto;"></div>
+            <button id="clearResults" class="btn-secondary" style="margin-top: 15px; width: 100%; color: #ef4444; border-color: #ef4444;">Clear History</button>
+        </div>
+    </div>
+    
+    <audio id="matchSound"><source src="match.mp3" type="audio/mpeg"></audio>
+    <audio id="clickSound"><source src="click.mp3" type="audio/mpeg"></audio>
+    <audio id="gameOverSound"><source src="gameover.mp3" type="audio/mpeg"></audio>
+    
+    <div id="footer">Created by English Teacher ABDULLAH AYDINHAN</div>
+
+    <script>
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=";
+        const apiKey = "AIzaSyBI6yDL0G3yPxCva8j7i2FnivXvq_quj6Y";
+        
+        let defaultWordPairs = [
+            { en: 'Accident', tr: 'Kaza' }, { en: 'Adult', tr: 'Yetişkin' }, { en: 'Among', tr: 'Arasında' },
+            { en: 'Relatives', tr: 'Akrabalar' }, { en: 'Invitation', tr: 'Davet' }, { en: 'Outside', tr: 'Dışarı' },
+            { en: 'Cool', tr: 'Serin' }, { en: 'Use', tr: 'Kullanmak' }, { en: 'Apple', tr: 'Elma' },
+            { en: 'Book', tr: 'Kitap' }, { en: 'Car', tr: 'Araba' }, { en: 'Tree', tr: 'Ağaç' },
+            { en: 'Water', tr: 'Su' }, { en: 'Sun', tr: 'Güneş' }, { en: 'Moon', tr: 'Ay' },
+            { en: 'Cat', tr: 'Kedi' }, { en: 'Dog', tr: 'Köpek' }, { en: 'Fish', tr: 'Balık' },
+            { en: 'Table', tr: 'Masa' }, { en: 'Chair', tr: 'Sandalye' }, { en: 'Food', tr: 'Yemek' },
+            { en: 'Sleep', tr: 'Uyku' }, { en: 'Read', tr: 'Okumak' }, { en: 'Write', tr: 'Yazmak' },
+            { en: 'Happy', tr: 'Mutlu' }, { en: 'Sad', tr: 'Üzgün' }, { en: 'Day', tr: 'Gün' },
+            { en: 'Night', tr: 'Gece' }, { en: 'House', tr: 'Ev' }, { en: 'School', tr: 'Okul' }
+        ];
+
+        let allWordPairs = [...defaultWordPairs];
+        let currentWordPairs = [];
+        let selectedWord = null;
+        let startTime;
+        let timerInterval;
+        let soundEnabled = true;
+        let finalMatches = new Map();
+        let distractorWord = null;
+        let idCounter = 0;
+
+        const sounds = {
+            match: document.getElementById('matchSound'),
+            click: document.getElementById('clickSound'),
+            gameover: document.getElementById('gameOverSound')
+        };
+
+        // --- CORE GAME FUNCTIONS ---
+
+        function initGame() {
+            startGame('new');
+        }
+
+        function startGame(mode) {
+            playSound('click');
+            clearInterval(timerInterval);
+            document.getElementById('postGameActions').style.display = 'none';
+            document.getElementById('geminiAssistant').style.display = 'none';
+            document.getElementById('result').innerHTML = '';
+            
+            const count = parseInt(document.getElementById('wordCountSelect').value);
+            currentWordPairs = selectRandomWords(count);
+            
+            finalMatches.clear();
+            selectedWord = null;
+            
+            createWordElements();
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+        }
+
+        function selectRandomWords(count) {
+            return allWordPairs.slice().sort(() => Math.random() - 0.5).slice(0, count);
+        }
+
+        function createWordElements() {
+            const enContainer = document.getElementById('englishWords');
+            const trContainer = document.getElementById('turkishWords');
+            enContainer.innerHTML = '';
+            trContainer.innerHTML = '';
+            
+            // Fix for mobile: Ensure containers are flex-row even via JS safety check
+            document.querySelector('.container').style.display = 'flex';
+
+            const selected = [...currentWordPairs];
+            const allTr = allWordPairs.map(p => p.tr);
+            const currentTr = selected.map(p => p.tr);
+            // Find a distractor that is NOT in the current game
+            const availDist = allTr.filter(tr => !currentTr.includes(tr));
+            distractorWord = availDist.length > 0 ? availDist[Math.floor(Math.random() * availDist.length)] : 'Extra';
+
+            let trList = [...currentTr, distractorWord];
+            shuffleArray(selected);
+            shuffleArray(trList);
+
+            selected.forEach((p, i) => {
+                const div = createWordElement(p.en, 'en', p.tr);
+                div.style.animationDelay = `${i * 0.05}s`;
+                enContainer.appendChild(div);
+            });
+
+            trList.forEach((tr, i) => {
+                const pair = currentWordPairs.find(p => p.tr === tr);
+                const matchKey = pair ? pair.en : null;
+                const div = createWordElement(tr, 'tr', matchKey);
+                div.style.animationDelay = `${i * 0.05}s`;
+                trContainer.appendChild(div);
+            });
+        }
+
+        function createWordElement(word, lang, matchKey) {
+            const div = document.createElement('div');
+            div.className = 'word';
+            div.textContent = word;
+            div.dataset.lang = lang;
+            div.dataset.word = word;
+            div.dataset.matchKey = matchKey;
+            div.id = `${lang}-${++idCounter}`;
+            div.onclick = handleWordClick;
+            return div;
+        }
+
+        function handleWordClick(e) {
+            const word = e.target;
+            playSound('click');
+            if (word.classList.contains('matched')) return;
+
+            if (!selectedWord) {
+                selectedWord = word;
+                word.classList.add('selected');
+            } else if (selectedWord === word) {
+                selectedWord = null;
+                word.classList.remove('selected');
+            } else {
+                if (selectedWord.dataset.lang !== word.dataset.lang) {
+                    checkMatch(selectedWord, word);
+                } else {
+                    // Switch selection if same language
+                    selectedWord.classList.remove('selected');
+                    selectedWord = word;
+                    word.classList.add('selected');
+                }
+            }
+        }
+
+        function checkMatch(w1, w2) {
+            const enEl = w1.dataset.lang === 'en' ? w1 : w2;
+            const trEl = w1.dataset.lang === 'tr' ? w1 : w2;
+            const isCorrect = enEl.dataset.matchKey === trEl.dataset.word;
+
+            // Remove selection visual immediately
+            w1.classList.remove('selected');
+            w2.classList.remove('selected');
+            selectedWord = null;
+
+            finalMatches.set(enEl.id, {
+                turkishId: trEl.id,
+                isCorrect: isCorrect,
+                enWord: enEl.dataset.word
+            });
+
+            enEl.classList.add('matched');
+            trEl.classList.add('matched');
+            
+            if (isCorrect) {
+                 enEl.style.backgroundColor = 'rgba(16, 185, 129, 0.2)'; // Hint of green
+                 trEl.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+            }
+
+            playSound('match');
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            if (finalMatches.size === currentWordPairs.length) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            const timeTaken = Math.round((new Date() - startTime) / 1000);
+            let correctCount = 0;
+
+            finalMatches.forEach((match, enId) => {
+                const enEl = document.getElementById(enId);
+                const trEl = document.getElementById(match.turkishId);
+                if (match.isCorrect) {
+                    enEl.classList.add('final-correct-match');
+                    trEl.classList.add('final-correct-match');
+                    correctCount++;
+                } else {
+                    enEl.classList.add('final-wrong-match');
+                    trEl.classList.add('final-wrong-match');
+                }
+                // Reset opacity for clarity
+                enEl.style.opacity = '1'; trEl.style.opacity = '1';
+                enEl.style.filter = 'none'; trEl.style.filter = 'none';
+            });
+
+            // Highlight distractor
+            const remaining = document.querySelector('#turkishWords .word:not(.matched)');
+            if (remaining) remaining.classList.add('final-wrong-match');
+
+            playSound('gameover');
+            createConfetti();
+
+            const score = Math.round((correctCount / currentWordPairs.length) * 100);
+            document.getElementById('result').innerHTML = `<h2 style="font-size:24px;">Score: ${score}%</h2>`;
+            document.getElementById('postGameActions').style.display = 'block';
+
+            saveGameResult({ date: new Date().toLocaleTimeString(), score: score, total: currentWordPairs.length });
+            prepareGeminiAssistant();
+        }
+
+        // --- UTILS ---
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+        
+        function updateTimer() {
+            document.getElementById('timer').textContent = Math.round((new Date() - startTime) / 1000);
+        }
+
+        function playSound(name) {
+            if (soundEnabled && sounds[name]) {
+                sounds[name].currentTime = 0;
+                sounds[name].play().catch(() => {});
+            }
+        }
+
+        // --- UI & MODAL HANDLING ---
+        
+        // Settings Modal
+        const settingsModal = document.getElementById('settingsModal');
+        document.getElementById('settingsBtn').onclick = () => settingsModal.style.display = "flex";
+        document.getElementById('closeSettings').onclick = () => settingsModal.style.display = "none";
+        document.getElementById('applySettingsBtn').onclick = () => {
+            settingsModal.style.display = "none";
+            startGame('new');
+        };
+
+        // Info Modal
+        const infoModal = document.getElementById('infoModal');
+        document.getElementById('infoBtn').onclick = () => infoModal.style.display = "flex";
+        document.getElementById('closeInfo').onclick = () => infoModal.style.display = "none";
+
+        // Results Modal
+        const resultsModal = document.getElementById('resultsModal');
+        document.getElementById('showResultsBtn').onclick = () => {
+             displayResults();
+             resultsModal.style.display = "flex";
+        };
+        document.getElementById('closeResults').onclick = () => resultsModal.style.display = "none";
+
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) e.target.style.display = "none";
+        };
+
+        // EXCEL HANDLING
+        async function loadExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                        const pairs = json.slice(1).map(row => ({
+                            en: row[0] ? row[0].toString().trim() : '',
+                            tr: row[1] ? row[1].toString().trim() : ''
+                        })).filter(p => p.en && p.tr);
+                        if (pairs.length === 0) throw new Error('No pairs');
+                        resolve(pairs);
+                    } catch (error) { reject(error); }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        document.getElementById('excelFile').addEventListener('change', async function(e) {
+            const msg = document.getElementById('loadingMessage');
+            msg.textContent = 'Loading...';
+            try {
+                const loaded = await loadExcelFile(e.target.files[0]);
+                allWordPairs = loaded;
+                msg.textContent = `✅ Loaded ${loaded.length} pairs! Press Apply.`;
+                document.getElementById('createGameSection').style.display = 'block';
+            } catch (error) {
+                msg.textContent = '❌ Error loading file.';
+                allWordPairs = [...defaultWordPairs];
+            }
+        });
+
+        // CREATE STANDALONE GAME
+        document.getElementById('createHtmlButton').addEventListener('click', function() {
+            let htmlContent = document.documentElement.outerHTML;
+            const newWordsJSON = JSON.stringify(allWordPairs);
+            htmlContent = htmlContent.replace(/let defaultWordPairs = \[\s*\{[\s\S]*?\}\s*\];/, `let defaultWordPairs = ${newWordsJSON};`);
+            htmlContent = htmlContent.replace('id="createGameSection" style="display: block;"', 'id="createGameSection" style="display: none;"');
+            
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `WordGame_${new Date().getTime()}.html`;
+            a.click();
+        });
+
+        // GEMINI AI & EXTRAS
+        function prepareGeminiAssistant() {
+            const wrongWords = [];
+            finalMatches.forEach(match => { if (!match.isCorrect) wrongWords.push(match.enWord); });
+            
+            if (wrongWords.length > 0) {
+                document.getElementById('geminiAssistant').style.display = 'block';
+                const select = document.getElementById('wrongWordsSelect');
+                select.innerHTML = '';
+                wrongWords.forEach(w => {
+                    const opt = document.createElement('option');
+                    opt.value = w; opt.textContent = w;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        async function callGemini(prompt) {
+            const respBox = document.getElementById('geminiResponse');
+            const loader = document.getElementById('geminiLoading');
+            loader.style.display = 'block'; respBox.textContent = '';
+            
+            try {
+                const res = await fetch(GEMINI_API_URL + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                respBox.textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+            } catch(e) { respBox.textContent = "AI Error."; }
+            loader.style.display = 'none';
+        }
+
+        document.getElementById('explainWordButton').onclick = () => {
+            const w = document.getElementById('wrongWordsSelect').value;
+            if(w) callGemini(`Define "${w}" simply in English.`);
+        };
+        document.getElementById('exampleSentenceButton').onclick = () => {
+            const w = document.getElementById('wrongWordsSelect').value;
+            if(w) callGemini(`Use "${w}" in a simple sentence.`);
+        };
+
+        // MISC
+        document.getElementById('soundToggle').onclick = function() {
+            soundEnabled = !soundEnabled;
+            this.textContent = soundEnabled ? '🔊 On' : '🔇 Off';
+        };
+
+        document.getElementById('fullscreenBtn').onclick = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+            else document.exitFullscreen();
+        };
+
+        document.getElementById('clearResults').onclick = () => {
+            localStorage.removeItem('gameResults');
+            displayResults();
+        };
+
+        function saveGameResult(r) {
+            const h = JSON.parse(localStorage.getItem('gameResults') || '[]');
+            h.push(r);
+            localStorage.setItem('gameResults', JSON.stringify(h.slice(-20)));
+        }
+
+        function displayResults() {
+            const h = JSON.parse(localStorage.getItem('gameResults') || '[]').reverse();
+            document.getElementById('resultsList').innerHTML = h.length ? 
+                h.map(i => `<div style="padding:10px; border-bottom:1px solid #444; display:flex; justify-content:space-between;"><span>${i.date}</span><span style="color:${i.score>70?'#10b981':'#ef4444'}">${i.score}%</span></div>`).join('') 
+                : '<div style="text-align:center; padding:20px; color:#aaa;">No games played yet.</div>';
+        }
+        
+        function createConfetti() {
+            const colors = ['#f093fb', '#fbbf24', '#34d399', '#60a5fa'];
+            for (let i = 0; i < 50; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + '%';
+                c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 2500);
+            }
+        }
+
+        // AUTO START ON LOAD
+        document.addEventListener('DOMContentLoaded', initGame);
+
+    </script>
+</body>
+</html>
