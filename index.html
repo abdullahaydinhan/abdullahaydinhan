@@ -50,24 +50,19 @@
         .grade-submenu {
             display: none;
             position: absolute;
-            left: 70px; /* Butonun sağında */
+            left: 70px;
             top: 0;
             background: white;
             border-radius: 12px;
             box-shadow: 5px 5px 30px rgba(0,0,0,0.25);
-            width: 500px; /* Geniş Mega Menü */
-            height: 320px; /* Sabit Yükseklik */
+            width: 500px;
+            height: 380px; /* Yükseklik biraz arttırıldı */
             border: 1px solid #eee;
             z-index: 1060;
             overflow: hidden;
-            display: none; /* Varsayılan gizli */
         }
 
-        /* Flex Yapı: Sol Linkler - Sağ Önizleme */
-        .submenu-layout {
-            display: flex;
-            height: 100%;
-        }
+        .submenu-layout { display: flex; height: 100%; }
 
         .submenu-links {
             width: 40%;
@@ -76,7 +71,7 @@
             border-right: 1px solid #eee;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 2px; /* Linkler arası boşluk */
             overflow-y: auto;
         }
 
@@ -87,22 +82,20 @@
             overflow-y: auto;
         }
 
-        /* Menü Linkleri */
         .submenu-link {
             display: flex;
             align-items: center;
-            padding: 10px 12px;
+            padding: 8px 10px;
             color: #555;
             text-decoration: none;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             transition: 0.2s;
         }
         .submenu-link:hover { background-color: #e9ecef; color: #0d6efd; transform: translateX(5px); }
         .submenu-link i { width: 25px; }
 
-        /* Hover Tetikleyici */
         .grade-menu-item:hover .grade-submenu { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
@@ -127,17 +120,15 @@
         .preview-text h6 { margin: 0; font-size: 0.85rem; font-weight: 700; color: #333; }
         .preview-text small { font-size: 0.7rem; color: #888; }
 
-        /* RESPONSIVE (MOBİL AYARLARI) */
+        /* MOBİL AYARLARI */
         @media (max-width: 768px) {
             .left-sidebar { gap: 8px; }
             .grade-menu-item { width: 40px; height: 40px; font-size: 0.8rem; border-radius: 0 10px 10px 0; }
             .grade-menu-item:hover { width: 50px; }
-            /* Mobilde Mega Menüyü Kapat (Çok yer kaplar) - Tıklayınca ana sayfaya gitsin */
             .grade-menu-item:hover .grade-submenu { display: none !important; } 
             .grade-circle { width: 25px; height: 25px; font-size: 0.9rem; }
         }
 
-        /* Sınıf İkonu */
         .grade-circle {
             width: 35px; height: 35px;
             background: rgba(255,255,255,0.2);
@@ -146,7 +137,7 @@
             font-size: 1.1rem;
         }
 
-        /* DİĞER STİLLER */
+        /* ETİKET VE RENKLER */
         .grade-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 8px; color: white; font-weight: 700; font-size: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
         .badge-9 { background: linear-gradient(45deg, #00c6ff, #0072ff); }
         .badge-10 { background: linear-gradient(45deg, #11998e, #38ef7d); }
@@ -162,7 +153,7 @@
         .icon-Videos { background-color: #dc3545; }
         .icon-Vocabulary { background-color: #198754; }
         .icon-Grammar { background-color: #fd7e14; }
-        .icon-Slides { background-color: #6f42c1; }
+        .icon-Slides { background-color: #212529; } /* Koyu renk */
         .icon-Documents { background-color: #0dcaf0; }
         
         .view-section { display: none; animation: fadeIn 0.5s ease; }
@@ -190,7 +181,7 @@
                         <li><a class="dropdown-item" onclick="switchView('Vocabulary')"><i class="fa-solid fa-book-open text-success me-2"></i> Vocabulary</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Grammar')"><i class="fa-solid fa-pen-nib text-warning me-2"></i> Grammar</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Videos')"><i class="fa-solid fa-youtube text-danger me-2"></i> Videos</a></li>
-                        <li><a class="dropdown-item" onclick="switchView('Slides')"><i class="fa-solid fa-person-chalkboard text-primary me-2"></i> Slides</a></li>
+                        <li><a class="dropdown-item" onclick="switchView('Slides')"><i class="fa-solid fa-person-chalkboard text-dark me-2"></i> Slides</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Documents')"><i class="fa-solid fa-file-pdf text-info me-2"></i> Documents</a></li>
                     </ul>
                 </li>
@@ -209,7 +200,8 @@
         grades.forEach(g => {
             const num = gradeNums[g];
             document.write(`
-            <div class="grade-menu-item" onclick="quickNav('${g}', 'Games')"> <div class="grade-circle">${num}</div>
+            <div class="grade-menu-item" onclick="quickNav('${g}', 'Games')">
+                <div class="grade-circle">${num}</div>
                 
                 <div class="grade-submenu">
                     <div class="submenu-layout">
@@ -220,7 +212,7 @@
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Vocabulary')" onclick="quickNav('${g}', 'Vocabulary')"><i class="fa-solid fa-book-open text-success"></i> Vocabulary</a>
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Grammar')" onclick="quickNav('${g}', 'Grammar')"><i class="fa-solid fa-pen-nib text-warning"></i> Grammar</a>
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Videos')" onclick="quickNav('${g}', 'Videos')"><i class="fa-solid fa-youtube text-danger"></i> Videos</a>
-                            <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Slides')" onclick="quickNav('${g}', 'Slides')"><i class="fa-solid fa-person-chalkboard text-primary"></i> Slides</a>
+                            <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Slides')" onclick="quickNav('${g}', 'Slides')"><i class="fa-solid fa-person-chalkboard text-dark"></i> Slides</a>
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Documents')" onclick="quickNav('${g}', 'Documents')"><i class="fa-solid fa-file-pdf text-info"></i> Documents</a>
                         </div>
                         <div class="submenu-preview" id="preview-${g}">
@@ -304,11 +296,10 @@
         renderHomeLatest(); 
     }).catch(e => console.error(e));
 
-    // --- MEGA MENU ÖNİZLEME FONKSİYONU ---
+    // --- MEGA MENU ÖNİZLEME ---
     function showPreview(grade, source) {
         const previewContainer = document.getElementById(`preview-${grade}`);
-        // O sınıf ve o kaynaktaki içerikleri bul
-        const items = allData.filter(i => i.grade === grade && i.source === source && i.isVisible !== false).slice(0, 5); // En son 5 tane
+        const items = allData.filter(i => i.grade === grade && i.source === source && i.isVisible !== false).slice(0, 5);
         
         if (items.length === 0) {
             previewContainer.innerHTML = `<div class="text-center text-muted mt-4"><small>No items found in<br><b>${source}</b></small></div>`;
@@ -317,9 +308,12 @@
 
         let html = `<div class="text-muted small mb-2 border-bottom pb-1">Latest in ${source}</div>`;
         items.forEach(item => {
+            // İKON SEÇİMİ (DOSYA TİPİNE GÖRE)
             let iconClass = CONFIG[item.source] ? CONFIG[item.source].icon : 'fa-file';
-            if(item.source === 'Vocabulary') iconClass = getFileIcon(item.name);
-            const cleanName = item.title || item.name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
+            if (['Vocabulary', 'Grammar', 'Slides', 'Documents'].includes(item.source)) {
+                iconClass = getFileIcon(item.name);
+            }
+            const cleanName = item.title || item.name.replace(/\.(html|pdf|docx|doc|xlsx|xls|ppt|pptx)$/i, '').replace(/_/g, ' ');
 
             html += `
             <div class="preview-item" onclick="window.open('${item.path}', '_blank')">
@@ -392,16 +386,18 @@
         container.innerHTML = html;
     }
 
+    // --- DOSYA İKONU BELİRLEME (GÜNCELLENDİ) ---
     function getFileIcon(filename) {
         if(filename.endsWith('.pdf')) return 'fa-file-pdf';
-        if(filename.endsWith('.docx') || filename.endsWith('.doc')) return 'fa-file-word';
-        if(filename.endsWith('.xlsx') || filename.endsWith('.xls')) return 'fa-file-excel';
+        if(filename.match(/\.(docx|doc)$/i)) return 'fa-file-word';
+        if(filename.match(/\.(xlsx|xls)$/i)) return 'fa-file-excel';
+        if(filename.match(/\.(pptx|ppt)$/i)) return 'fa-file-powerpoint';
         if(filename.endsWith('.html')) return 'fa-globe';
         return 'fa-file';
     }
 
     function createCardHTML(item) {
-        const displayTitle = item.title || item.name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
+        const displayTitle = item.title || item.name.replace(/\.(html|pdf|docx|doc|xlsx|xls|ppt|pptx)$/i, '').replace(/_/g, ' ');
         const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
         
         const gradeNum = item.grade.replace('TH_GRADE', ''); 
@@ -410,11 +406,16 @@
         
         let iconClass = 'fa-gamepad'; 
         let bgClass = 'icon-Games';
+        
         if (CONFIG[item.source]) {
             iconClass = CONFIG[item.source].icon;
             bgClass = 'icon-' + item.source;
         }
-        if (item.source === 'Vocabulary') iconClass = getFileIcon(item.name);
+        
+        // Eğer dosya tabanlı bir bölümse, özel dosya ikonu kullan
+        if (['Vocabulary', 'Grammar', 'Slides', 'Documents'].includes(item.source)) {
+            iconClass = getFileIcon(item.name);
+        }
 
         return `
             <div class="col">
