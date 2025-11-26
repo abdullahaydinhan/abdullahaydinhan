@@ -6,7 +6,10 @@ on:
       - 'Games/**'
       - 'Interactive_Activities/**'
       - 'Vocabulary/**'
-      - 'Videos/**' # ARTIK VİDEOLARI DA TAKİP EDECEK
+      - 'Videos/**'
+      - 'Grammar/**'   # YENİ
+      - 'Slides/**'    # YENİ
+      - 'Documents/**' # YENİ
   workflow_dispatch:
 
 jobs:
@@ -17,7 +20,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Generate JSON with VIDEOS Support
+    - name: Generate JSON with FULL Support
       uses: actions/github-script@v6
       with:
         script: |
@@ -25,12 +28,17 @@ jobs:
           const path = require('path');
 
           // KLASÖR TANIMLARI
-          const gamesDir = 'Games';
-          const activitiesDir = 'Interactive_Activities';
-          const vocabDir = 'Vocabulary';
-          const videosDir = 'Videos'; // YENİ EKLENDİ
-          const outputFile = 'games_data.json';
+          const dirs = {
+            'Games': 'Games',
+            'Interactive_Activities': 'Interactive_Activities',
+            'Vocabulary': 'Vocabulary',
+            'Videos': 'Videos',
+            'Grammar': 'Grammar',
+            'Slides': 'Slides',
+            'Documents': 'Documents'
+          };
           
+          const outputFile = 'games_data.json';
           let results = [];
           let existingData = {};
 
@@ -46,21 +54,25 @@ jobs:
           function createEntry(realPath, name, defaultGrade, defaultSource) {
              const old = existingData[realPath];
              
-             const cleanName = name.replace(/\.(html|pdf|docx|xlsx)$/i, '').replace(/_/g, ' ');
+             // Uzantıları temizle
+             const cleanName = name.replace(/\.(html|pdf|docx|doc|xlsx|xls|ppt|pptx)$/i, '').replace(/_/g, ' ');
              const finalTitle = (old && old.title) ? old.title : cleanName;
              const finalSource = (old && old.source) ? old.source : defaultSource;
 
-             // Varsayılan renkler
+             // Varsayılan Renkler (Bootstrap sınıfları)
              let defColor = 'bg-primary';
              if (finalSource === 'Interactive_Activities') defColor = 'bg-info';
              if (finalSource === 'Vocabulary') defColor = 'bg-success';
-             if (finalSource === 'Videos') defColor = 'bg-danger'; // Videolar Kırmızı
+             if (finalSource === 'Videos') defColor = 'bg-danger';
+             if (finalSource === 'Grammar') defColor = 'bg-warning text-dark';
+             if (finalSource === 'Slides') defColor = 'bg-dark'; // Mor yerine koyu
+             if (finalSource === 'Documents') defColor = 'bg-info';
 
              return {
                 path: realPath,
                 name: name,
                 title: finalTitle,
-                description: (old && old.description) ? old.description : "Click to view content.",
+                description: (old && old.description) ? old.description : "Click to view.",
                 grade: (old && old.grade) ? old.grade : defaultGrade,
                 source: finalSource,
                 unit: (old && old.unit) ? old.unit : "",
@@ -70,66 +82,43 @@ jobs:
              };
           }
 
-          // 1. GAMES
-          if (fs.existsSync(gamesDir)) {
-            fs.readdirSync(gamesDir).forEach(grade => {
-              const gradePath = path.join(gamesDir, grade);
-              if (fs.statSync(gradePath).isDirectory()) {
-                fs.readdirSync(gradePath).forEach(gameName => {
-                  const gamePath = path.join(gradePath, gameName);
-                  if (fs.statSync(gamePath).isDirectory() && fs.existsSync(path.join(gamePath, 'index.html'))) {
-                    const fullPath = `${gamesDir}/${grade}/${gameName}/index.html`;
-                    results.push(createEntry(fullPath, gameName, grade, 'Games'));
-                  }
-                });
-              }
-            });
-          }
+          // --- TARAMA FONKSİYONU ---
+          // Her klasör için ayrı ayrı if yazmak yerine döngüye aldım, daha temiz oldu.
+          Object.keys(dirs).forEach(sourceType => {
+            const dirPath = dirs[sourceType];
+            
+            if (fs.existsSync(dirPath)) {
+              fs.readdirSync(dirPath).forEach(grade => {
+                const gradePath = path.join(dirPath, grade);
+                if (fs.statSync(gradePath).isDirectory()) {
+                  fs.readdirSync(gradePath).forEach(file => {
+                    const fullPath = path.join(gradePath, file);
+                    const webPath = `${dirPath}/${grade}/${file}`; // Web uyumlu yol
 
-          // 2. INTERACTIVE ACTIVITIES
-          if (fs.existsSync(activitiesDir)) {
-            fs.readdirSync(activitiesDir).forEach(grade => {
-              const gradePath = path.join(activitiesDir, grade);
-              if (fs.statSync(gradePath).isDirectory()) {
-                fs.readdirSync(gradePath).forEach(file => {
-                  if (file.endsWith('.html')) {
-                    const fullPath = `${activitiesDir}/${grade}/${file}`;
-                    results.push(createEntry(fullPath, file, grade, 'Interactive_Activities'));
-                  }
-                });
-              }
-            });
-          }
+                    // 1. KLASÖR TİPİ (Games için)
+                    if (fs.statSync(fullPath).isDirectory()) {
+                        if (fs.existsSync(path.join(fullPath, 'index.html'))) {
+                            results.push(createEntry(`${webPath}/index.html`, file, grade, sourceType));
+                        }
+                    } 
+                    // 2. DOSYA TİPİ (Diğerleri için)
+                    else {
+                        // Hangi uzantıları kabul edelim?
+                        // Slides için PPT ekle, diğerleri standart
+                        let regex = /\.(html|pdf|docx|doc|xlsx|xls)$/i;
+                        if (sourceType === 'Slides') {
+                            regex = /\.(html|pdf|docx|doc|xlsx|xls|ppt|pptx)$/i;
+                        }
 
-          // 3. VOCABULARY
-          if (fs.existsSync(vocabDir)) {
-            fs.readdirSync(vocabDir).forEach(grade => {
-              const gradePath = path.join(vocabDir, grade);
-              if (fs.statSync(gradePath).isDirectory()) {
-                fs.readdirSync(gradePath).forEach(file => {
-                  if (file.match(/\.(html|pdf|docx|xlsx)$/i)) {
-                    const fullPath = `${vocabDir}/${grade}/${file}`;
-                    results.push(createEntry(fullPath, file, grade, 'Vocabulary'));
-                  }
-                });
-              }
-            });
-          }
-
-          // 4. VIDEOS (YENİ BÖLÜM - HTML DOSYALARINI TARAR)
-          if (fs.existsSync(videosDir)) {
-            fs.readdirSync(videosDir).forEach(grade => {
-              const gradePath = path.join(videosDir, grade);
-              if (fs.statSync(gradePath).isDirectory()) {
-                fs.readdirSync(gradePath).forEach(file => {
-                  if (file.endsWith('.html')) { // Video wrap dosyaları html olur
-                    const fullPath = `${videosDir}/${grade}/${file}`;
-                    results.push(createEntry(fullPath, file, grade, 'Videos'));
-                  }
-                });
-              }
-            });
-          }
+                        if (file.match(regex)) {
+                            results.push(createEntry(webPath, file, grade, sourceType));
+                        }
+                    }
+                  });
+                }
+              });
+            }
+          });
 
           fs.writeFileSync(outputFile, JSON.stringify(results, null, 2));
 
@@ -138,4 +127,4 @@ jobs:
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
         git add games_data.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Updated Content: Added Videos Support 🎬" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Updated: Added Grammar, Slides, Documents 🚀" && git push)
