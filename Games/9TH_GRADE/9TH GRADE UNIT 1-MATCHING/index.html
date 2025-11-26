@@ -1,0 +1,671 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="appTitle">English Word Matching Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes confetti { 0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); 
+            background-size: 400% 400%; 
+            animation: gradientShift 15s ease infinite; 
+            margin: 0; 
+            padding: 10px; 
+            min-height: 100vh; 
+            position: relative; 
+            overflow-x: hidden;
+        }
+        
+        .confetti { position: fixed; width: 10px; height: 10px; z-index: 9999; animation: confetti 3s linear; pointer-events: none; }
+        
+        /* HEADER UI CONTROLS */
+        .ui-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 2000;
+        }
+
+        .icon-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .icon-button:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.3); }
+
+        /* GAME LAYOUT */
+        .game-header {
+            display: flex; justify-content: center; align-items: center; margin-bottom: 15px;
+            margin-top: 50px; /* Space for top buttons */
+        }
+
+        #timer {
+            text-align: center; color: white; font-size: 20px; font-weight: 700;
+            padding: 10px 25px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .container { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 0 auto; 
+            max-width: 1100px; 
+            gap: 20px; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        .word-list { width: 48%; display: flex; flex-direction: column; gap: 10px; }
+        
+        .word {
+            width: 100%; padding: 15px; position: relative; display: flex; align-items: center; justify-content: center; text-align: center;
+            font-size: 16px; font-weight: 600; cursor: pointer; user-select: none; touch-action: manipulation;
+            transition: all 0.2s; min-height: 50px; border-radius: 12px;
+            backdrop-filter: blur(5px); overflow: hidden; animation: fadeInUp 0.4s ease;
+            word-break: break-word; hyphens: auto; line-height: 1.3;
+        }
+        
+        #englishWords .word {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.9));
+            box-shadow: 0 4px 10px rgba(255, 165, 0, 0.3); color: #2d2d2d;
+        }
+        
+        #turkishWords .word {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(139, 92, 246, 0.9));
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); color: white;
+        }
+        
+        .word.selected {
+            border: 3px solid #FF1493 !important; transform: scale(1.02) !important;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.6) !important;
+        }
+        
+        .word.matched { opacity: 0.5; pointer-events: none; filter: grayscale(0.5); transform: scale(0.95); }
+        
+        .final-correct-match { background: #10b981 !important; border: 2px solid #059669 !important; }
+        .final-wrong-match { background: #ef4444 !important; border: 2px solid #b91c1c !important; }
+
+        /* GEMINI & RESULTS */
+        #geminiAssistant {
+            margin: 20px auto; padding: 20px; background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px); border-radius: 15px; max-width: 600px;
+            color: white; border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #geminiResponse {
+            margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); 
+            border-radius: 8px; font-size: 14px; line-height: 1.5;
+        }
+
+        .assistant-actions { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+        .assistant-actions button, .assistant-actions select {
+            flex: 1; padding: 10px; border-radius: 8px; border: none; font-size: 13px;
+        }
+
+        #result { text-align: center; color: white; margin-top: 20px; }
+
+        /* MODALS */
+        .modal {
+            display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px);
+            align-items: center; justify-content: center;
+        }
+
+        .modal-content {
+            background: #2d3748; color: white; margin: 20px; padding: 25px;
+            border-radius: 20px; width: 90%; max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 90vh; overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .modal-header h2 { font-size: 20px; color: #fbbf24; }
+        .close-modal { font-size: 28px; cursor: pointer; color: #aaa; }
+
+        /* SETTINGS FORM */
+        .setting-item { margin-bottom: 15px; }
+        .setting-item label { display: block; margin-bottom: 5px; font-size: 14px; color: #a0aec0; }
+        .setting-item select, .setting-item input[type="file"] {
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px; color: white; font-size: 15px;
+        }
+
+        .btn-primary {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #10b981, #059669);
+            color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px;
+            cursor: pointer; margin-top: 10px;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 8px 15px;
+            color: white; border-radius: 8px; cursor: pointer; font-size: 13px;
+        }
+
+        #createGameSection {
+            background: rgba(236, 72, 153, 0.1); border: 1px dashed rgba(236, 72, 153, 0.5);
+            padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center;
+        }
+
+        #footer {
+            text-align: center; padding: 10px; font-size: 11px; color: rgba(255,255,255,0.6);
+            position: fixed; bottom: 0; left: 0; width: 100%; pointer-events: none;
+        }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 768px) {
+            .container { 
+                flex-direction: row !important; /* Force side by side on mobile */
+                gap: 8px;
+            }
+            .word {
+                font-size: 11px; /* Smaller text */
+                padding: 5px;
+                min-height: 45px;
+            }
+            .word-list { width: 49%; } /* Tighter columns */
+            .game-header { margin-top: 60px; }
+            #timer { font-size: 16px; padding: 8px 15px; }
+            .ui-controls { top: 5px; right: 5px; gap: 5px; }
+            .icon-button { width: 40px; height: 40px; font-size: 18px; }
+            #geminiAssistant { margin: 10px; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="ui-controls">
+        <button id="fullscreenBtn" class="icon-button" title="Fullscreen">⛶</button>
+        <button id="infoBtn" class="icon-button" title="How to Play">ℹ️</button>
+        <button id="settingsBtn" class="icon-button" title="Settings" style="background: rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5);">⚙️</button>
+    </div>
+
+    <div id="gameScreen">
+        <div class="game-header">
+            <div id="timer">17</div>
+        </div>
+        
+        <div class="container" style="display: flex;">
+            <div id="englishWords" class="word-list"><div class="word" data-lang="en" data-word="Cool" data-match-key="Serin" id="en-1" style="animation-delay: 0s;">Cool</div><div class="word" data-lang="en" data-word="Moon" data-match-key="Ay" id="en-2" style="animation-delay: 0.05s;">Moon</div><div class="word" data-lang="en" data-word="Car" data-match-key="Araba" id="en-3" style="animation-delay: 0.1s;">Car</div><div class="word" data-lang="en" data-word="Write" data-match-key="Yazmak" id="en-4" style="animation-delay: 0.15s;">Write</div><div class="word" data-lang="en" data-word="Accident" data-match-key="Kaza" id="en-5" style="animation-delay: 0.2s;">Accident</div><div class="word" data-lang="en" data-word="House" data-match-key="Ev" id="en-6" style="animation-delay: 0.25s;">House</div><div class="word" data-lang="en" data-word="School" data-match-key="Okul" id="en-7" style="animation-delay: 0.3s;">School</div><div class="word" data-lang="en" data-word="Tree" data-match-key="Ağaç" id="en-8" style="animation-delay: 0.35s;">Tree</div><div class="word" data-lang="en" data-word="Day" data-match-key="Gün" id="en-9" style="animation-delay: 0.4s;">Day</div><div class="word" data-lang="en" data-word="Night" data-match-key="Gece" id="en-10" style="animation-delay: 0.45s;">Night</div></div>
+            <div id="turkishWords" class="word-list"><div class="word" data-lang="tr" data-word="Okul" data-match-key="School" id="tr-11" style="animation-delay: 0s;">Okul</div><div class="word" data-lang="tr" data-word="Gün" data-match-key="Day" id="tr-12" style="animation-delay: 0.05s;">Gün</div><div class="word" data-lang="tr" data-word="Ay" data-match-key="Moon" id="tr-13" style="animation-delay: 0.1s;">Ay</div><div class="word" data-lang="tr" data-word="Balık" data-match-key="null" id="tr-14" style="animation-delay: 0.15s;">Balık</div><div class="word" data-lang="tr" data-word="Serin" data-match-key="Cool" id="tr-15" style="animation-delay: 0.2s;">Serin</div><div class="word" data-lang="tr" data-word="Kaza" data-match-key="Accident" id="tr-16" style="animation-delay: 0.25s;">Kaza</div><div class="word" data-lang="tr" data-word="Ağaç" data-match-key="Tree" id="tr-17" style="animation-delay: 0.3s;">Ağaç</div><div class="word" data-lang="tr" data-word="Yazmak" data-match-key="Write" id="tr-18" style="animation-delay: 0.35s;">Yazmak</div><div class="word" data-lang="tr" data-word="Ev" data-match-key="House" id="tr-19" style="animation-delay: 0.4s;">Ev</div><div class="word" data-lang="tr" data-word="Araba" data-match-key="Car" id="tr-20" style="animation-delay: 0.45s;">Araba</div><div class="word" data-lang="tr" data-word="Gece" data-match-key="Night" id="tr-21" style="animation-delay: 0.5s;">Gece</div></div>
+        </div>
+
+        <div id="result"></div>
+
+        <div id="geminiAssistant" style="display: none;">
+            <h3>✨ Assistant</h3>
+            <div class="assistant-actions">
+                <select id="wrongWordsSelect"></select>
+                <button id="explainWordButton" class="btn-secondary">Define</button>
+                <button id="exampleSentenceButton" class="btn-secondary">Example</button>
+            </div>
+            <div id="geminiLoading" style="display: none; margin-top:5px; font-size:12px;">Thinking...</div>
+            <div id="geminiResponse"></div>
+        </div>
+        
+        <div id="postGameActions" style="text-align: center; margin-top: 20px; display: none;">
+            <button onclick="startGame('new')" class="btn-secondary" style="background: #10b981; padding: 12px 25px; font-size: 16px;">🎮 Play Again</button>
+            <button id="showResultsBtn" class="btn-secondary" style="padding: 12px 25px; font-size: 16px;">📊 Results</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Game Settings</h2>
+                <span class="close-modal" id="closeSettings">×</span>
+            </div>
+
+            <div class="setting-item">
+                <label>📂 Upload Word List (Excel)</label>
+                <input type="file" id="excelFile" accept=".xlsx,.xls">
+                <div id="loadingMessage" style="font-size: 12px; margin-top: 5px; color: #10b981;">✅ Loaded 675 pairs! Press Apply.</div>
+            </div>
+
+            <div id="createGameSection" style="display: none;">
+                <p style="color: white; font-size: 13px; margin-bottom: 8px;">Save current list as a new App:</p>
+                <button id="createHtmlButton" class="btn-secondary" style="width: 100%; border-color: #ec4899; background: rgba(236, 72, 153, 0.2);">💾 Download Standalone Game</button>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <div class="setting-item" style="flex: 1;">
+                    <label>Word Count</label>
+                    <select id="wordCountSelect">
+                        <option value="10">10 Pairs</option>
+                        <option value="15">15 Pairs</option>
+                        <option value="20">20 Pairs</option>
+                        <option value="30">30 Pairs</option>
+                    </select>
+                </div>
+                <div class="setting-item" style="flex: 1;">
+                    <label>Sound</label>
+                    <button id="soundToggle" class="btn-secondary" style="width: 100%; height: 45px; margin-top: 0;">🔊 On</button>
+                </div>
+            </div>
+
+            <button id="applySettingsBtn" class="btn-primary">✅ Apply &amp; Restart Game</button>
+        </div>
+    </div>
+
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>How to Play</h2><span class="close-modal" id="closeInfo">×</span></div>
+            <p>1. Match English words with Turkish translations.</p>
+            <p>2. Green = Correct, Red = Wrong.</p>
+            <p>3. One extra Turkish word has no match!</p>
+            <p>4. Use the ⚙️ Gear icon to upload your own words.</p>
+        </div>
+    </div>
+
+    <div id="resultsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>📊 History</h2><span class="close-modal" id="closeResults">×</span></div>
+            <div id="resultsList" style="max-height: 300px; overflow-y: auto;"></div>
+            <button id="clearResults" class="btn-secondary" style="margin-top: 15px; width: 100%; color: #ef4444; border-color: #ef4444;">Clear History</button>
+        </div>
+    </div>
+    
+    <audio id="matchSound"><source src="match.mp3" type="audio/mpeg"></audio>
+    <audio id="clickSound"><source src="click.mp3" type="audio/mpeg"></audio>
+    <audio id="gameOverSound"><source src="gameover.mp3" type="audio/mpeg"></audio>
+    
+    <div id="footer">Created by English Teacher ABDULLAH AYDINHAN</div>
+
+    <script>
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=";
+        const apiKey = "AIzaSyBI6yDL0G3yPxCva8j7i2FnivXvq_quj6Y";
+        
+        let defaultWordPairs = [{"en":"ABİLİTY","tr":"YETENEK"},{"en":"ABSURD","tr":"SAÇMA"},{"en":"ACCEPT","tr":"KABUL ETMEK"},{"en":"ACCESS","tr":"BAĞLANMAK"},{"en":"ACCİDENT","tr":"KAZA"},{"en":"ACCOUNT","tr":"HESAP"},{"en":"ACHİEVEMENT","tr":"BAŞARI"},{"en":"ACTİVİTİES","tr":"EYLEMLER"},{"en":"ACTİVİTY","tr":"AKTİVİTE"},{"en":"ADD","tr":"EKLEMEK"},{"en":"AFTER","tr":"SONRA"},{"en":"AİM","tr":"HEDEF"},{"en":"AMAZİNG","tr":"ŞAŞIRTICI"},{"en":"AMERİCAN","tr":"AMERİKALI"},{"en":"AMONG","tr":"ARASINDA"},{"en":"AMUSEMENT PARK","tr":"LUNAPARK"},{"en":"AMUSİNG","tr":"EĞLENCELİ"},{"en":"ANCESTOR","tr":"ATA"},{"en":"ANCİENT","tr":"TARİHİ"},{"en":"ANCİENT RUİN","tr":"ANTİK KALINTI"},{"en":"ANSWER","tr":"CEVAP"},{"en":"APPROVE","tr":"ONAYLAMAK"},{"en":"ARCHİTECTURE","tr":"MİMARİ"},{"en":"ART MUSEUM","tr":"SANAT MÜZESİ"},{"en":"ASSİGNMENT","tr":"ÖDEV"},{"en":"ATTACHMENT","tr":"E-POSTA EKİ"},{"en":"ATTEND","tr":"KATILMAK"},{"en":"ATTRACTİON","tr":"İLGİ ÇEKİCİ YER"},{"en":"AUSTRALİAN","tr":"AVUSTRALYALI"},{"en":"AVAİLABLE","tr":"MÜSAİT"},{"en":"AWARD","tr":"ÖDÜL"},{"en":"AWESOME","tr":"HARİKA"},{"en":"AZERBAİJAN","tr":"AZERBAYCAN"},{"en":"AZERBAİJANİ","tr":"AZERBAYCANLI"},{"en":"BACK UP","tr":"ARKA ÇIKMAK"},{"en":"BACKGROUND","tr":"ARKA PLAN"},{"en":"BAKE","tr":"FIRINDA PİŞİRMEK"},{"en":"BAND","tr":"MÜZİK GRUBU"},{"en":"BARBEQUE","tr":"BARBEKÜ"},{"en":"BEACH","tr":"SAHİL"},{"en":"BECAUSE","tr":"ÇÜNKÜ"},{"en":"BEFORE","tr":"ÖNCEDEN"},{"en":"BEHAVE","tr":"DAVRANMAK"},{"en":"BELİEVE","tr":"İNANMAK"},{"en":"BEST FRİEND","tr":"EN İYİ ARKADAŞ"},{"en":"BEVERAGE","tr":"İÇECEK"},{"en":"BİKE AROUND","tr":"BİSİKLETLE DOLAŞMAK"},{"en":"BİRTHDAY","tr":"DOĞUM GÜNÜ"},{"en":"BLACK PEPPER","tr":"KARA BİBER"},{"en":"BLEND","tr":"KARIŞTIRMAK"},{"en":"BLOG","tr":"GÜNCE"},{"en":"BOAT","tr":"BOT"},{"en":"BOAT RİDE","tr":"TEKNE GEZİSİ"},{"en":"BOİL","tr":"HAŞLAMAK"},{"en":"BOOK","tr":"KİTAP"},{"en":"BORİNG","tr":"SIKICI"},{"en":"BOUGHT(BUY)","tr":"SATIN ALMAK"},{"en":"BOWL","tr":"KASE"},{"en":"BRİNG","tr":"GETİRMEK"},{"en":"BRİTİSH","tr":"BRİTANYALI"},{"en":"BUDDY","tr":"ARKADAŞ"},{"en":"BUİLDİNG","tr":"BİNA"},{"en":"BULGARİA","tr":"BULGARİSTAN"},{"en":"BULGARİAN","tr":"BULGARCA"},{"en":"BUSY","tr":"MEŞGUL"},{"en":"BUY","tr":"SATIN ALMAK"},{"en":"CALL","tr":"ARAMAK"},{"en":"CALL CENTER","tr":"MÜŞTERİ HİZMETLERİ"},{"en":"CANADA","tr":"KANADA"},{"en":"CANADİAN","tr":"KANADALI"},{"en":"CAN'T STAND","tr":"KATLANAMAMAK"},{"en":"CAPİTAL","tr":"BAŞKENT"},{"en":"CARPET ART","tr":"HALI SANATI"},{"en":"CASTLE","tr":"KALE"},{"en":"CHALLENGE","tr":"MEYDAN OKUMA"},{"en":"CHALLENGİNG","tr":"AŞIRI ZOR"},{"en":"CHANGE","tr":"DEĞİŞTİRMEK"},{"en":"CHECK","tr":"KONTROL ETMEK"},{"en":"CHEF","tr":"ŞEF"},{"en":"CHEMİSTRY","tr":"KİMYA"},{"en":"CHİLDREN","tr":"ÇOCUKLAR"},{"en":"CHİLE","tr":"ŞİLİ"},{"en":"CHİLEAN","tr":"ŞİLİLİ"},{"en":"CHİNA","tr":"ÇİN"},{"en":"CHOP","tr":"DOĞRAMAK"},{"en":"CHOPSTİCKS","tr":"YEMEK ÇUBUKLARI"},{"en":"CHORE","tr":"EV İŞİ"},{"en":"CHORES","tr":"EV İŞLERİ"},{"en":"CİRCLE","tr":"DAİRE İÇİNE ALMAK"},{"en":"CİTİZEN","tr":"VATANDAŞ"},{"en":"CİTY","tr":"ŞEHİR"},{"en":"CLASSMATES","tr":"SINIF ARKADAŞLARI"},{"en":"CLİMATE","tr":"İKLİM"},{"en":"CLOSE FRİEND","tr":"YAKIN ARKADAŞ"},{"en":"CLOSE TO","tr":"YAKININDA"},{"en":"CLOTHES","tr":"KIYAFET"},{"en":"CLUE","tr":"İPUCU"},{"en":"COME TOGETHER","tr":"BİR ARAYA GELMEK"},{"en":"COMMENT","tr":"YORUM"},{"en":"COMMENTS","tr":"YORUMLAR"},{"en":"COMMUNİCATE","tr":"İLETİŞİM KURMAK"},{"en":"COMMUNİCATİON","tr":"İLETİŞİM"},{"en":"COMPLETE","tr":"TAMAMLAMAK"},{"en":"COMPUTER","tr":"BİLGİSAYAR"},{"en":"CONCERT","tr":"KONSER"},{"en":"CONDUCT EXPERİMENT","tr":"DENEY YAPMAK"},{"en":"CONFİRM","tr":"ONAYLAMAK"},{"en":"CONNECT","tr":"BAĞLAMAK"},{"en":"CONNECTİON","tr":"BAĞLANTI"},{"en":"CONSİST OF","tr":"İÇERMEK"},{"en":"CONTACT","tr":"BAĞLANTI KURMAK"},{"en":"CONTAİN","tr":"İÇERMEK"},{"en":"CONTAMİNATİON","tr":"KİRLİLİK"},{"en":"CONTİNUE","tr":"DEVAM ETMEK"},{"en":"CONTİNUOUSLY","tr":"SÜREKLİ OLARAK"},{"en":"CONVERSATİON","tr":"KONUŞMA"},{"en":"COOK","tr":"AŞÇI"},{"en":"COOK MEAL","tr":"YEMEK PİŞİRMEK"},{"en":"COOKİES","tr":"KURABİYE"},{"en":"COOKİNG PROCESS","tr":"PİŞİRME SÜRECİ"},{"en":"COOL","tr":"HARİKA"},{"en":"CORRECT","tr":"DOĞRU"},{"en":"COSTUME","tr":"KOSTÜM"},{"en":"COUNT ON","tr":"GÜVENMEK"},{"en":"COUNTRY","tr":"ÜLKE"},{"en":"COUNTRYSİDE","tr":"KIRSAL BÖLGE"},{"en":"COURSE","tr":"KURS"},{"en":"CRAZY ABOUT","tr":"ÇOK SEVMEK"},{"en":"CREATE","tr":"YARATMAK"},{"en":"CUİSİNE","tr":"YEMEKLER"},{"en":"CULTURAL HERİTAGE","tr":"KÜLTÜREL MİRAS"},{"en":"CULTURE","tr":"KÜLTÜR"},{"en":"CURİOUS ABOUT","tr":"MERAKLI"},{"en":"CUSTOMER","tr":"MÜŞTERİ"},{"en":"CUT","tr":"KESMEK"},{"en":"CYBERATTACK","tr":"SİBER SALDIRI"},{"en":"CYBERSECURİTY","tr":"SİBER GÜVENLİK"},{"en":"DAMAGE","tr":"ZARAR VERMEK"},{"en":"DANGEROUS","tr":"TEHLİKELİ"},{"en":"DATA THEFT","tr":"VERİ HIRSIZLIĞI"},{"en":"DATE","tr":"TARİH"},{"en":"DAY TRİP","tr":"GÜNLÜK GEZİ"},{"en":"DECİDE","tr":"KARAR VERMEK"},{"en":"DECORATE","tr":"SÜSLEMEK"},{"en":"DELETE","tr":"SİLMEK"},{"en":"DELİCİOUS","tr":"LEZZETLİ"},{"en":"DEPEND ON","tr":"GÜVENMEK"},{"en":"DESERT","tr":"ÇÖL"},{"en":"DESSERT","tr":"TATLI"},{"en":"DESTİNATİON","tr":"GİDİLECEK YER"},{"en":"DESTROY","tr":"YOK ETMEK"},{"en":"DESTRUCT","tr":"YIKMAK"},{"en":"DESTRUCTİVE","tr":"YIKICI"},{"en":"DEVELOP","tr":"GELİŞTİRMEK"},{"en":"DEVİCE","tr":"AYGIT"},{"en":"DİALOGUE","tr":"DİYALOG"},{"en":"DİCE","tr":"DOĞRAMAK"},{"en":"DİFFERENT","tr":"FARKLI"},{"en":"DİFFİCULT","tr":"ZOR"},{"en":"DİRTY DİSHES","tr":"KİRLİ TABAKLAR"},{"en":"DİSASTERS","tr":"DOĞAL AFETLER"},{"en":"DİSCUSS","tr":"TARTIŞMAK"},{"en":"DİSHES","tr":"YEMEK"},{"en":"DO EXPERİMENT","tr":"DENEY YAPMAK"},{"en":"DO THE LAUNDRY","tr":"ÇAMAŞIR İŞLERİ YAPMAK"},{"en":"DO THE WASHİNG","tr":"ÇAMAŞIR YIKAMAK"},{"en":"DOWNLOAD","tr":"İNDİRMEK"},{"en":"DRİNK","tr":"İÇMEK"},{"en":"DURİNG","tr":"ESNASINDA"},{"en":"DUST THE FURNİTURE","tr":"MOBİLYALARIN TOZUNU ALMAK"},{"en":"DUTY","tr":"GÖREV"},{"en":"EACH OTHER","tr":"BİRBİRLERİNİ"},{"en":"EARLY AGES","tr":"ERKEN YAŞLAR"},{"en":"EARTH","tr":"DÜNYA"},{"en":"EARTHQUAKE","tr":"DEPREM"},{"en":"EASY","tr":"KOLAY"},{"en":"END","tr":"BİTMEK"},{"en":"ENGAGED","tr":"MEŞGUL"},{"en":"ENGLAND","tr":"İNGİLTERE"},{"en":"ENGLİSH","tr":"İNGİLİZ"},{"en":"ENGLİSH / FRENCH","tr":"İNGİLİZCE / FRANSIZCA"},{"en":"ENJOY","tr":"KEYİF ALMAK"},{"en":"ENORMOUS","tr":"KOCAMAN"},{"en":"ENTERTAİNİNG","tr":"EĞLENCELİ"},{"en":"ENTRANCE","tr":"GİRİŞ"},{"en":"ENVİRONMENT","tr":"ÇEVRE"},{"en":"ERASE","tr":"SİLMEK"},{"en":"EROSİON","tr":"EROZYON"},{"en":"EVALUATE","tr":"DEĞERLENDİRMEK"},{"en":"EVEN","tr":"HATTA"},{"en":"EVENT","tr":"ETKİNLİK"},{"en":"EXAM","tr":"SINAV"},{"en":"EXCELLENT","tr":"HARİKA"},{"en":"EXCİTİNG","tr":"HEYECAN VERİCİ"},{"en":"EXCUSE","tr":"BAHANE"},{"en":"EXPERİENCE","tr":"DENEYİM"},{"en":"EXPLORE","tr":"KEŞFETMEK"},{"en":"EXTRA","tr":"FAZLADAN"},{"en":"EXTREME","tr":"AŞIRI"},{"en":"FAMİLY","tr":"AİLE"},{"en":"FAMOUS","tr":"ÜNLÜ"},{"en":"FAMOUS FOR","tr":"... İLE ÜNLÜ"},{"en":"FASCİNATİNG","tr":"BÜYÜLEYİCİ"},{"en":"FASHİONABLE","tr":"SON MODA"},{"en":"FATTY","tr":"YAĞLI"},{"en":"FEEDBACK","tr":"GERİ BİLDİRİM"},{"en":"FİNİSH","tr":"BİTİRMEK"},{"en":"FİRM","tr":"FİRMA"},{"en":"FLİGHT","tr":"UÇUŞ"},{"en":"FLOOD","tr":"SEL"},{"en":"FLOUR","tr":"UN"},{"en":"FOR MORE İNFORMATİON","tr":"DAHA FAZLA BİLGİ İÇİN"},{"en":"FOREST","tr":"ORMAN"},{"en":"FOREST FİRE","tr":"ORMAN YANGINI"},{"en":"FOUNDATİON","tr":"KURULUŞ"},{"en":"FRANCE","tr":"FRANSA"},{"en":"FRENCH","tr":"FRANSIZ"},{"en":"FRİEND","tr":"ARKADAŞ"},{"en":"FRİENDLY","tr":"ARKADAŞ CANLISI"},{"en":"FRY","tr":"KIZARTMAK"},{"en":"FULL","tr":"TOK"},{"en":"FUNNY","tr":"EĞLENCELİ"},{"en":"FUTURE","tr":"GELECEK"},{"en":"GALLERY","tr":"GALERİ"},{"en":"GAME","tr":"OYUN"},{"en":"GARBAGE","tr":"ÇÖP"},{"en":"GENERALLY","tr":"GENELLİKLE"},{"en":"GENERATE","tr":"ÜRETMEK"},{"en":"GENEROUS","tr":"CÖMERT"},{"en":"GERMAN","tr":"ALMANCA"},{"en":"GERMANY","tr":"ALMANYA"},{"en":"GET A PROMOTİON","tr":"TERFİ ALMAK"},{"en":"GET ON WELL","tr":"İYİ ANLAŞMAK"},{"en":"GİFT","tr":"HEDİYE"},{"en":"GO FOR A HİKE","tr":"YÜRÜYÜŞE ÇIKMAK"},{"en":"GO ON","tr":"DEVAM ETMEK"},{"en":"GO OUT","tr":"DİŞARI ÇIKMAK"},{"en":"GO SİGHTSEEİNG","tr":"GEZİYE ÇIKMAK"},{"en":"GOAL","tr":"HEDEF"},{"en":"GOOD WİSH","tr":"İYİ DİLEKLER"},{"en":"GOOD WİSHES","tr":"İYİ DİLEKLER"},{"en":"GOVERNMENT OFFİCE","tr":"DEVLET DAİRESİ"},{"en":"GREASY","tr":"YAĞLI"},{"en":"GREAT","tr":"HARİKA"},{"en":"GREETİNG","tr":"SELAMLAMA"},{"en":"GRİL","tr":"IZGARA"},{"en":"GUEST","tr":"MİSAFİR"},{"en":"GUESTS","tr":"MİSAFİRLER"},{"en":"GUN","tr":"SİLAH"},{"en":"HABİT","tr":"ALIŞKANLIK"},{"en":"HALF OF","tr":"YARISI"},{"en":"HANG ON","tr":"BEKLEMEK"},{"en":"HAPPEN","tr":"MEYDANA GELMEK"},{"en":"HARMFUL","tr":"ZARARLI"},{"en":"HATE","tr":"NEFRET ETMEK"},{"en":"HAVE SİMİLAR İNTERESTS","tr":"BENZER İLGİLERE SAHİP OLMAK"},{"en":"HEALTH","tr":"SAĞLIK"},{"en":"HEALTHY","tr":"SAĞLIKLI"},{"en":"HEAT","tr":"ISITMAK"},{"en":"HELMET","tr":"KASK"},{"en":"HELP","tr":"YARDIM ETMEK"},{"en":"HİKİNG","tr":"DOĞA YÜRÜYÜŞÜ"},{"en":"HİNDİ / ENGLİSH","tr":"HİNTÇE / İNGİLİZCE"},{"en":"HİSTORİC","tr":"TARİHİ"},{"en":"HİSTORİCAL","tr":"TARİHİ"},{"en":"HİSTORİCAL SİTE","tr":"TARİHİ YER"},{"en":"HİSTORY","tr":"TARİH"},{"en":"HİT","tr":"VURMAK"},{"en":"HOBBİES","tr":"HOBİ"},{"en":"HOLD ON","tr":"BEKLEMEK"},{"en":"HOLD ON A MOMENT","tr":"BİR DAKİKA HATTA BEKLEYİN"},{"en":"HOLİDAY","tr":"YOLCULUK"},{"en":"HOME","tr":"EV"},{"en":"HONEST","tr":"DÜRÜST"},{"en":"HOSPİTAL","tr":"HASTANE"},{"en":"HOUR","tr":"SAAT"},{"en":"HOUSEHOLD CHORES","tr":"EV İŞLERİ"},{"en":"HOW OFTEN","tr":"NE SIKLIKLA"},{"en":"HUGE","tr":"KOCAMAN"},{"en":"HUNGARİAN","tr":"MACAR"},{"en":"HURRİCANE","tr":"KASIRGA"},{"en":"I AM SORRY TO HEAR THAT","tr":"BUNU DUYDUĞUMA ÜZGÜNÜM"},{"en":"I HOPE HE GETS BETTER SOON","tr":"UMARIM DAHA İYİ OLUR"},{"en":"I'LL GET HİM.","tr":"TELOFONU BAĞLIYORUM"},{"en":"INDİA","tr":"HİNDİSTAN"},{"en":"INDİAN","tr":"HİNTLİ"},{"en":"INTERNET","tr":"İNTERNET"},{"en":"IRİSH","tr":"İRLANDALI"},{"en":"ITALİAN","tr":"İTALYANCA"},{"en":"İCON","tr":"SEMBOL"},{"en":"İDEA","tr":"FİKİR"},{"en":"İMAGİNE","tr":"HAYAL ETMEK"},{"en":"İMPORTANCE","tr":"ÖNEM"},{"en":"İMPORTANT","tr":"ÖNEMLİ"},{"en":"İMPRESSİVE","tr":"ETKİLEYİCİ"},{"en":"İMPROVE","tr":"GELİŞTİRMEK"},{"en":"İNCLUDE","tr":"İÇERMEK"},{"en":"İNCLUDİNG","tr":"İÇEREN"},{"en":"İNCREDİBLE","tr":"İNANILMAZ"},{"en":"İNDİGENOUS","tr":"YERLİ"},{"en":"İNFORMATİON","tr":"BİLGİ"},{"en":"İNGREDİENTS","tr":"MALZEMELER"},{"en":"İNSTİTUTİON","tr":"KURULUŞ"},{"en":"İNSTRUCTOR","tr":"EĞİTMEN"},{"en":"İNTERESTED İN","tr":"İLGİLİ OLMAK"},{"en":"İNTERESTİNG","tr":"İLGİNÇ"},{"en":"İNTERESTS","tr":"İLGİ"},{"en":"İNTERVİEW","tr":"RÖPORTAJ"},{"en":"İNTRODUCE","tr":"TANITMAK"},{"en":"İNVENT","tr":"İCAT ETMEK"},{"en":"İNVİTATİON","tr":"DAVET"},{"en":"İNVİTE","tr":"DAVET ETMEK"},{"en":"İSSUE","tr":"SORUN"},{"en":"JAPAN","tr":"JAPONYA"},{"en":"JAPANESE","tr":"JAPONCA"},{"en":"JOB","tr":"MESLEK"},{"en":"JOİN","tr":"KATILMAK"},{"en":"JOURNEY","tr":"YOLCULUK"},{"en":"KAZAKH","tr":"KAZAKÇA"},{"en":"KEEN ON","tr":"İLGİ DUYMAK"},{"en":"KEEP İN TOUCH","tr":"İLETİŞİM KURMAK"},{"en":"KİDS","tr":"ÇOCUKLAR"},{"en":"KİND","tr":"TÜR"},{"en":"KİTCHEN","tr":"MUTFAK"},{"en":"KNOWLEDGE","tr":"BİLGİ"},{"en":"KOREAN","tr":"KORECE"},{"en":"KYRGYZSTAN","tr":"KIRGIZİSTAN"},{"en":"LAİD BACK","tr":"RAHAT"},{"en":"LAKE","tr":"GÖL"},{"en":"LAND POLLUTİON","tr":"TOPRAK KİRLİLİĞİ"},{"en":"LANDSCAPE","tr":"MANZARA"},{"en":"LANDSLİDE","tr":"TOPRAK KAYMASI"},{"en":"LANGUAGE","tr":"DİL"},{"en":"LAST STEP","tr":"SON ADIM"},{"en":"LEARN","tr":"ÖĞRENMEK"},{"en":"LECTURE","tr":"DERS"},{"en":"LİFE","tr":"HAYAT"},{"en":"LİKE","tr":"SEVMEK"},{"en":"LİNES","tr":"(OYUN) REPLİKLERİ"},{"en":"LİSTEN","tr":"DİNLEMEK"},{"en":"LOCAL","tr":"YEREL"},{"en":"LOCAL FOOD","tr":"YEREL YEMEK"},{"en":"LOCAL MARKET","tr":"YEREL PAZAR"},{"en":"LOCATİON","tr":"KONUM"},{"en":"LOG İN","tr":"GİRİŞ YAPMAK"},{"en":"LOG OFF","tr":"ÇIKIŞ YAPMAK"},{"en":"LOG OUT","tr":"ÇIKIŞ YAPMAK"},{"en":"LOOK FOR","tr":"ARAMAK"},{"en":"MAGNİFİCENT","tr":"MUHTEŞEM"},{"en":"MAKE","tr":"YAPMAK"},{"en":"MAKE THE BED","tr":"YATAĞI TOPLAMAK"},{"en":"MANY","tr":"BİR ÇOK"},{"en":"MATCH","tr":"EŞLEŞTİRMEK"},{"en":"MATE","tr":"ARKADAŞ"},{"en":"MATTER","tr":"SORUN"},{"en":"MEAL","tr":"YEMEK"},{"en":"MEET","tr":"BULUŞMAK"},{"en":"MEMORABLE","tr":"UNUTULMAZ"},{"en":"MESSAGE","tr":"MESAJ"},{"en":"MESSY","tr":"DAĞINIK"},{"en":"METHOD","tr":"YÖNTEM"},{"en":"MEXİCAN","tr":"MEKSİKALI"},{"en":"MEXİCO","tr":"MEKSİKA"},{"en":"MİNUTE","tr":"DAKİKA"},{"en":"MİSS","tr":"ÖZLEMEK"},{"en":"MİX","tr":"KARIŞTIRMAK"},{"en":"MİXTURE","tr":"KARIŞIM"},{"en":"MODERN ERA","tr":"MODERN ÇAĞ"},{"en":"MONUMENT","tr":"ANIT"},{"en":"MOST OF","tr":"ÇOĞU"},{"en":"MOSTLY","tr":"ÇOĞUNLUKLA"},{"en":"MOUNTAİN","tr":"DAĞ"},{"en":"MOVİE","tr":"FİLM"},{"en":"MUSEUM","tr":"MÜZE"},{"en":"MUST–SEE","tr":"GÖRMEYE DEĞER"},{"en":"NATİONAL PARK","tr":"MİLLİ PARK"},{"en":"NATİONALİTY","tr":"MİLLİYET"},{"en":"NATİVE LANGUAGE","tr":"ANA DİL"},{"en":"NATURAL BEAUTY","tr":"DOĞAL GÜZELLİK"},{"en":"NATURAL FORCES","tr":"DOĞAL AFETLER"},{"en":"NATURAL WONDER","tr":"DOĞAL HARİKA"},{"en":"NATURE","tr":"DOĞA"},{"en":"NATURE WALKİNG","tr":"DOĞA YÜRÜYÜŞÜ"},{"en":"NEARLY","tr":"YAKLAŞIK"},{"en":"NECESSARY","tr":"GEREKLİ"},{"en":"NECESSİTY","tr":"GEREKLİLİK"},{"en":"NEED","tr":"İHTİYACI OLMAK"},{"en":"NEW ZEALAND","tr":"YENİ ZELANDA"},{"en":"NEWCOMER","tr":"YENİ GELEN"},{"en":"NON–STOP","tr":"SÜREKLİ OLARAK"},{"en":"NORTHERN IRELAND","tr":"KUZEY İRLANDA"},{"en":"NORWAY","tr":"NORVEÇ"},{"en":"NORWEGİAN","tr":"NORVEÇLİ"},{"en":"NOTİFİCATİON","tr":"BİLDİRİM"},{"en":"OBLİGATİON","tr":"ZORUNLULUK"},{"en":"OCCUPATİON","tr":"MESLEK"},{"en":"OFFER","tr":"TEKLİF ETMEK"},{"en":"OFFİCİAL LANGUAGE","tr":"RESMİ DİL"},{"en":"OFFLİNE","tr":"ÇEVRİMDIŞI"},{"en":"OİL","tr":"YAĞ"},{"en":"OLİVE OİL","tr":"ZEYTİN YAĞI"},{"en":"ONİON","tr":"SOĞAN"},{"en":"ONLİNE","tr":"ÇEVRİMİÇİ"},{"en":"ONLİNE PORTFOLİO","tr":"ÇEVRİMİÇİ PORTFÖY"},{"en":"OPİNİON","tr":"DÜŞÜNCE"},{"en":"OPPORTUNİTY","tr":"FIRSAT"},{"en":"ORDER","tr":"SİPARİŞ VERMEK"},{"en":"ORDİNARY","tr":"SIRADAN"},{"en":"ORGANİZE","tr":"ORGANİZE ETMEK"},{"en":"OUTSİDE","tr":"DIŞARI"},{"en":"PAİNTİNG","tr":"TABLO"},{"en":"PALACE","tr":"SARAY"},{"en":"PAN","tr":"TAVA"},{"en":"PARACHUTE","tr":"PARAŞÜT"},{"en":"PARADİSE","tr":"CENNET"},{"en":"PARAGLADİNG","tr":"PLANÖR"},{"en":"PARSLEY","tr":"MAYDANOZ"},{"en":"PARTY","tr":"PARTİ"},{"en":"PASSWORD","tr":"ŞİFRE"},{"en":"PAY BİLL","tr":"FATURA ÖDEMEK"},{"en":"PEACEFUL","tr":"HUZURLU"},{"en":"PEEL","tr":"SOYMAK"},{"en":"PEOPLE","tr":"İNSANLAR"},{"en":"PERFORM","tr":"SAHNELEMEK"},{"en":"PERFORMANCE","tr":"GÖSTERİ"},{"en":"PERSONAL İNTERESTS","tr":"KİŞİLER İLGİLER"},{"en":"PERSONAL COMPUTER","tr":"KİŞİSEL BİLGİSAYAR"},{"en":"PERSONAL İNFORMATİON","tr":"KİŞİSEL BİLGİ"},{"en":"PERSONAL İNTERESTS","tr":"KİŞİLER İLGİLER"},{"en":"PERU","tr":"PERU"},{"en":"PERUVİAN","tr":"PERULU"},{"en":"PHONE","tr":"TELEFON ETMEK"},{"en":"PHYSİCS","tr":"FİZİK"},{"en":"PİECE","tr":"PARÇA"},{"en":"PLACE","tr":"YER"},{"en":"PLAY","tr":"OYUN (TİYATRO)"},{"en":"POLAND","tr":"POLONYA"},{"en":"POLİSH","tr":"LEHÇE"},{"en":"POLİTE","tr":"KİBAR"},{"en":"POLLUTİON","tr":"KİRLİLİK"},{"en":"POSSİBİLİTY","tr":"OLASILIK"},{"en":"POST","tr":"GÖNDERMEK"},{"en":"POUR","tr":"DÖKMEK"},{"en":"PRACTİCE","tr":"ANTRENMAN YAPMAK"},{"en":"PRACTİSE","tr":"PRATİK YAPMAK"},{"en":"PRECAUTİON","tr":"ÖNLEM ALMAK"},{"en":"PREFER","tr":"TERCİH ETMEK"},{"en":"PREPARE MEAL","tr":"YEMEK HAZIRLAMAK"},{"en":"PRESENT","tr":"HEDİYE"},{"en":"PRESERVE","tr":"KORUMAK"},{"en":"PREVENT","tr":"ÖNLEMEK"},{"en":"PRİVATE COMPANY","tr":"ÖZEL ŞİRKET"},{"en":"PRİZE","tr":"ÖDÜL"},{"en":"PROBLEM","tr":"SORUN"},{"en":"PROCESS","tr":"SÜREÇ"},{"en":"PRODUCE","tr":"ÜRETMEK"},{"en":"PROJECT","tr":"PROJE"},{"en":"PROPER","tr":"UYGUN"},{"en":"PROPERLY","tr":"DÜZGÜNCE"},{"en":"PROTECT","tr":"KORUMAK"},{"en":"PROVİDE","tr":"SAĞLAMAK"},{"en":"PUT","tr":"KOYMAK"},{"en":"PUT THROUGH","tr":"TELEFONU BAĞLAMAK"},{"en":"QUESTİON","tr":"SORU"},{"en":"RACE","tr":"YARIŞ"},{"en":"RARELY","tr":"NADİREN"},{"en":"READ","tr":"OKUMAK"},{"en":"READY FOR","tr":"HAZIR OLMAK"},{"en":"REASON","tr":"SEBEP"},{"en":"REASONS","tr":"NEDENLER"},{"en":"RECEİPE","tr":"TARİF"},{"en":"RECİPE","tr":"TARİF"},{"en":"REFLECTİON","tr":"YANSITMA"},{"en":"REFUSE","tr":"REDDETMEK"},{"en":"RELATİVES","tr":"AKRABALAR"},{"en":"RELAXED","tr":"SAKİN"},{"en":"RELİABLE","tr":"GÜVENİLİR"},{"en":"REPLY","tr":"CEVAP"},{"en":"RESCUE","tr":"KURTARMAK"},{"en":"RESEARCH","tr":"ARAŞTIRMA"},{"en":"RESEARCHERS","tr":"ARAŞTIRMACILAR"},{"en":"RESERVE","tr":"REZERVASYON YAPTIRMAK"},{"en":"RESPONSE","tr":"CEVAP"},{"en":"RESPONSİBLE","tr":"SORUMLU"},{"en":"RESULTS","tr":"SONUÇLAR"},{"en":"RİCH HİSTORY","tr":"ZENGİN TARİH"},{"en":"RİDİCULOUS","tr":"SAÇMA"},{"en":"RİSKY","tr":"RİSKLİ"},{"en":"RİVER","tr":"NEHİR"},{"en":"ROAD","tr":"YOL"},{"en":"ROCK ART","tr":"KAYA SANATI"},{"en":"RUBBİSH","tr":"ÇÖP"},{"en":"RULE","tr":"KURAL"},{"en":"RULES","tr":"KURALLAR"},{"en":"RUN BUSİNESS","tr":"İŞ YÜRÜTMEK"},{"en":"RUN OUT","tr":"TÜKENMEK"},{"en":"RUSSİA","tr":"RUSYA"},{"en":"RUSSİAN","tr":"RUSÇA"},{"en":"SAFE","tr":"GÜVENLİ"},{"en":"SAFETY","tr":"GÜVENLİK"},{"en":"SALTY","tr":"TUZLU"},{"en":"SAME","tr":"AYNI"},{"en":"SAVE TİME","tr":"ZAMAN KAZANMAK"},{"en":"SAY","tr":"SÖYLEMEK"},{"en":"SCHOOL","tr":"OKUL"},{"en":"SCİENTİFİC","tr":"BİLİMSEL"},{"en":"SCİENTSİT","tr":"BİLİM İNSANI"},{"en":"SCOTLAND","tr":"İSKOÇYA"},{"en":"SCOTTİSH","tr":"İSKOÇ"},{"en":"SCRİPT","tr":"SENARYO"},{"en":"SEARCH","tr":"ARAŞTIRMAK"},{"en":"SEARCH FOR","tr":"ARAMAK"},{"en":"SEASİDE","tr":"DENİZ KENARI"},{"en":"SECRET","tr":"SIR"},{"en":"SELDOM","tr":"NADİREN"},{"en":"SEND","tr":"GÖNDERMEK"},{"en":"SET THE STAGE","tr":"SAHNEYİ DÜZENLEMEK"},{"en":"SHARE","tr":"PAYLAŞMAK"},{"en":"SHARE SECRET","tr":"SIR PAYLAŞMAK"},{"en":"SHİP","tr":"GEMİ"},{"en":"SHOPPİNG","tr":"ALIŞVERİŞ"},{"en":"SHOPPİNG CENTER","tr":"ALIŞVERİŞ MERKEZİ"},{"en":"SİGN İN","tr":"GİRİŞ YAPMAK"},{"en":"SİGNİFİCANT","tr":"ÖNEMLİ"},{"en":"SİLK ROAD","tr":"İPEK YOLU"},{"en":"SİMİLAR İNTERESTS","tr":"BENZER İLGİ ALANLARI"},{"en":"SİMPLE","tr":"KOLAY"},{"en":"SKYSCRAPER","tr":"GÖKDELEN"},{"en":"SLİCE","tr":"DİLİMLEMEK"},{"en":"SMALL PİECES","tr":"KÜÇÜK PARÇALAR"},{"en":"SOCİAL MEDİA","tr":"SOSYAL MEDYA"},{"en":"SOCİAL NETWORKİNG SİTE","tr":"SOSYAL AĞ SİTELERİ"},{"en":"SOİL CONTAMİNATİON","tr":"TOPRAK KİRLİLİĞİ"},{"en":"SOLVE","tr":"ÇÖZMEK"},{"en":"SORRY","tr":"ÜZGÜN"},{"en":"SOUCEPAN","tr":"SOS TAVASI"},{"en":"SOUP","tr":"ÇORBA"},{"en":"SOUR","tr":"EKŞİ"},{"en":"SOUTH AFRİCA","tr":"GÜNEY AFRİKA"},{"en":"SOUTH AFRİCAN","tr":"GÜNEY AFRİKALI"},{"en":"SOUTH KOREA","tr":"GÜNEY KORE"},{"en":"SOUTH KOREAN","tr":"GÜNEY KORELİ"},{"en":"SOUVENİR","tr":"HEDİYE"},{"en":"SPAİN","tr":"İSPANYA"},{"en":"SPANİSH","tr":"İSPANYOL"},{"en":"SPEAK","tr":"KONUŞMAK"},{"en":"SPEND","tr":"HARCAMAK"},{"en":"SPİCY","tr":"BAHARATLI"},{"en":"SQUARE","tr":"MEYDAN"},{"en":"STATEMENT","tr":"İFADE"},{"en":"STAY","tr":"KALMAK"},{"en":"STEAL","tr":"ÇALMAK"},{"en":"STEP","tr":"ADIM"},{"en":"STİR","tr":"KARIŞTIRMAK"},{"en":"STORM","tr":"FIRTINA"},{"en":"STROLL THROUGH","tr":"DOLAŞMAK"},{"en":"STRUCK","tr":"VURMAK"},{"en":"STRUCTURE","tr":"YAPI"},{"en":"STUDY","tr":"DERS ÇALIŞMAK"},{"en":"STUFFED","tr":"TOK"},{"en":"SUBMİT","tr":"TESLİM ETMEK"},{"en":"SUGER","tr":"ŞEKER"},{"en":"SUGGEST","tr":"TEKLİF ETMEK"},{"en":"SUGGESTİON","tr":"ÖNERİ"},{"en":"SUİTABLE","tr":"UYGUN"},{"en":"SUNSET VİEW","tr":"GÜN BATIMI MANZARASI"},{"en":"SUPPORT","tr":"DESTEKLEMEK"},{"en":"SUPPORTİVE","tr":"DESTEKLEYİCİ"},{"en":"SURVEY","tr":"ANKET"},{"en":"SWEET","tr":"TATLI"},{"en":"SYMBOL","tr":"SEMBOL"},{"en":"TACTİC","tr":"TAKTİK"},{"en":"TAKE A MEMO","tr":"NOT ALMAK"},{"en":"TAKE A NOTE","tr":"NOT ALMAK"},{"en":"TAKE A TRİP","tr":"GEZİYE ÇIKMAK"},{"en":"TAKE MEASURE","tr":"ÖNLEM ALMAK"},{"en":"TAKE OUT THE GARBAGE","tr":"ÇÖPÜ DIŞARI ATMAK"},{"en":"TAKE PHOTOS","tr":"FOTOĞRAF ÇEKMEK"},{"en":"TAKE PLACE","tr":"MEYDANA GELMEK"},{"en":"TALK","tr":"KONUŞMAK"},{"en":"TASK","tr":"GÖREV"},{"en":"TASTE","tr":"TATMAK"},{"en":"TASTY","tr":"LEZZETLİ"},{"en":"TEAM","tr":"TAKIM"},{"en":"TEAMWORK","tr":"TAKIM ÇALIŞMASI"},{"en":"TEENAGER","tr":"GENÇ"},{"en":"TEENEGER","tr":"GENÇLER"},{"en":"TELL","tr":"SÖYLEMEK"},{"en":"TELL THE TRUTH","tr":"DOĞRUYU SÖYLEMEK"},{"en":"TEMPERATURE","tr":"SICAKLIK"},{"en":"TERRİBLE","tr":"BERBAT"},{"en":"TERRİFİC","tr":"ETKİLEYİCİ"},{"en":"TERRRİFİC","tr":"HARİKA"},{"en":"THAİ","tr":"TAYCA"},{"en":"THAİLAND","tr":"TAYLAND"},{"en":"THE TURKİSH REPUBLİC OF NORTHERN CYPRUS","tr":"KUZEY KIBRIS TÜRK CUMHURİYETİ"},{"en":"THE UK (UNİTED KİNGDOM)","tr":"BİRLEŞİK KRALLIK"},{"en":"THE USA (UNİTED STATES OF AMERİCA)","tr":"AMERİKA BİRLEŞİK DEVLETLERİ"},{"en":"THERMAL BATH","tr":"KAPLICA"},{"en":"TİCKET","tr":"BİLET"},{"en":"TİME","tr":"ZAMAN"},{"en":"TİP","tr":"İPUCU"},{"en":"TO‐DO LİST","tr":"YAPILACAK LİSTESİ"},{"en":"TOMORROW","tr":"YARIN"},{"en":"TONİGHT","tr":"BUGECE"},{"en":"TOO MUCH","tr":"ÇOK FAZLA"},{"en":"TOOL","tr":"ALET"},{"en":"TOUR","tr":"TUR"},{"en":"TOURİST","tr":"TURİST"},{"en":"TOURİST ATTRACTİON","tr":"TURİSTİK CAZİBE"},{"en":"TOURİST SPOTS","tr":"TURİSTİK YERLER"},{"en":"TRADİTİONAL","tr":"GELENEKSEL"},{"en":"TRAFFİC","tr":"TRAFİK"},{"en":"TRAİNİNG","tr":"ANTRENMAN"},{"en":"TRANSPORTATİON","tr":"ULAŞIM"},{"en":"TRASH","tr":"ÇÖP"},{"en":"TRAVEL","tr":"SEYEHAT ETMEK"},{"en":"TRAVEL–TRİP","tr":"SEYAHAT"},{"en":"TREKKİNG","tr":"DOĞA YÜRÜYÜŞÜ"},{"en":"TRENDY","tr":"MODA"},{"en":"TRENDY CLOTHES","tr":"MODA KIYAFETLER"},{"en":"TRİP","tr":"GEZİ"},{"en":"TRUE","tr":"DOĞRU"},{"en":"TRUST","tr":"GÜVENMEK"},{"en":"TURKİC STATES","tr":"TÜRKÎ DEVLETLER"},{"en":"TURKİSH","tr":"TÜRK"},{"en":"TURKİSH CYPRİOT","tr":"KIBRISLI TÜRK"},{"en":"TURKMEN","tr":"TÜRKMEN"},{"en":"TURKMENİSTAN","tr":"TÜRKMENİSTAN"},{"en":"TÜRKİYE","tr":"TÜRKİYE"},{"en":"TWİCE A WEEK","tr":"HAFTADA İKİ KEZ"},{"en":"TYPE","tr":"ÇEŞİT"},{"en":"TYPİCAL","tr":"OLAĞAN"},{"en":"UNBEARABLE","tr":"KATLANILMAZ"},{"en":"UNBELİEVABLE","tr":"İNANILMAZ"},{"en":"UNEXPLORED","tr":"KEŞFEDİLMEMİŞ"},{"en":"UNİQUE","tr":"EŞSİZ"},{"en":"UNTİDY","tr":"DÜZENSİZ"},{"en":"UNTİL","tr":"E KADAR"},{"en":"UNUSUAL","tr":"ALIŞILMADIK"},{"en":"UPLOAD","tr":"YÜKLEMEK"},{"en":"USE","tr":"KULLANMAK"},{"en":"USUAL","tr":"NORMAL"},{"en":"USUALLY","tr":"GENELLİKLE"},{"en":"UZBEK","tr":"ÖZBEK"},{"en":"UZBEKİSTAN","tr":"ÖZBEKİSTAN"},{"en":"VACATİON","tr":"YOLCULUK"},{"en":"VALLEY","tr":"VADİ"},{"en":"VEGATABLE","tr":"SEBZE"},{"en":"VİSİT","tr":"ZİYARET ETMEK"},{"en":"VİSİTOR","tr":"ZİYARETÇİ"},{"en":"VOCABULARY","tr":"KELİME BİLGİSİ"},{"en":"VOCATİONAL SCHOOLS","tr":"MESLEK OKULLARI"},{"en":"VOLCANO","tr":"VOLKAN"},{"en":"WAİT","tr":"BEKLEMEK"},{"en":"WALES","tr":"GALLER"},{"en":"WASH","tr":"YIKAMAK"},{"en":"WASHİNG THE DİSHES","tr":"BULAŞIK YIKAMAK"},{"en":"WATCH","tr":"İZLEMEK"},{"en":"WATHCİNG THE SCENERY","tr":"MANZARAYI İZLEMEK"},{"en":"WAY","tr":"YOL"},{"en":"WEAPON","tr":"SİLAH"},{"en":"WEAR","tr":"GİYİNMEK"},{"en":"WEEKEND","tr":"HAFTA SONU"},{"en":"WELCOMİNG","tr":"MİSAFİRPERVER"},{"en":"WELL‐KNOWN","tr":"İYİ BİLİNEN"},{"en":"WHAT TYPE OF","tr":"NE TÜR"},{"en":"WHAT'S WRONG WİTH HİM?","tr":"ONUN SIKINTISI NE?"},{"en":"WONDERFUL","tr":"HARİKA"},{"en":"WORK FROM HOME","tr":"EVDEN ÇALIŞMAK"},{"en":"WORK İN PAİRS","tr":"İKİŞERLİ ÇALIŞMAK"},{"en":"WORLD","tr":"DÜNYA"},{"en":"WORRİED","tr":"ENDİŞELİ"},{"en":"WORTH SEEİNG","tr":"GÖRMEYE DEĞER"},{"en":"WOULD RATHER","tr":"TERCİH ETMEK"}];
+
+        let allWordPairs = [...defaultWordPairs];
+        let currentWordPairs = [];
+        let selectedWord = null;
+        let startTime;
+        let timerInterval;
+        let soundEnabled = true;
+        let finalMatches = new Map();
+        let distractorWord = null;
+        let idCounter = 0;
+
+        const sounds = {
+            match: document.getElementById('matchSound'),
+            click: document.getElementById('clickSound'),
+            gameover: document.getElementById('gameOverSound')
+        };
+
+        // --- CORE GAME FUNCTIONS ---
+
+        function initGame() {
+            startGame('new');
+        }
+
+        function startGame(mode) {
+            playSound('click');
+            clearInterval(timerInterval);
+            document.getElementById('postGameActions').style.display = 'none';
+            document.getElementById('geminiAssistant').style.display = 'none';
+            document.getElementById('result').innerHTML = '';
+            
+            const count = parseInt(document.getElementById('wordCountSelect').value);
+            currentWordPairs = selectRandomWords(count);
+            
+            finalMatches.clear();
+            selectedWord = null;
+            
+            createWordElements();
+            startTime = new Date();
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+        }
+
+        function selectRandomWords(count) {
+            return allWordPairs.slice().sort(() => Math.random() - 0.5).slice(0, count);
+        }
+
+        function createWordElements() {
+            const enContainer = document.getElementById('englishWords');
+            const trContainer = document.getElementById('turkishWords');
+            enContainer.innerHTML = '';
+            trContainer.innerHTML = '';
+            
+            // Fix for mobile: Ensure containers are flex-row even via JS safety check
+            document.querySelector('.container').style.display = 'flex';
+
+            const selected = [...currentWordPairs];
+            const allTr = allWordPairs.map(p => p.tr);
+            const currentTr = selected.map(p => p.tr);
+            // Find a distractor that is NOT in the current game
+            const availDist = allTr.filter(tr => !currentTr.includes(tr));
+            distractorWord = availDist.length > 0 ? availDist[Math.floor(Math.random() * availDist.length)] : 'Extra';
+
+            let trList = [...currentTr, distractorWord];
+            shuffleArray(selected);
+            shuffleArray(trList);
+
+            selected.forEach((p, i) => {
+                const div = createWordElement(p.en, 'en', p.tr);
+                div.style.animationDelay = `${i * 0.05}s`;
+                enContainer.appendChild(div);
+            });
+
+            trList.forEach((tr, i) => {
+                const pair = currentWordPairs.find(p => p.tr === tr);
+                const matchKey = pair ? pair.en : null;
+                const div = createWordElement(tr, 'tr', matchKey);
+                div.style.animationDelay = `${i * 0.05}s`;
+                trContainer.appendChild(div);
+            });
+        }
+
+        function createWordElement(word, lang, matchKey) {
+            const div = document.createElement('div');
+            div.className = 'word';
+            div.textContent = word;
+            div.dataset.lang = lang;
+            div.dataset.word = word;
+            div.dataset.matchKey = matchKey;
+            div.id = `${lang}-${++idCounter}`;
+            div.onclick = handleWordClick;
+            return div;
+        }
+
+        function handleWordClick(e) {
+            const word = e.target;
+            playSound('click');
+            if (word.classList.contains('matched')) return;
+
+            if (!selectedWord) {
+                selectedWord = word;
+                word.classList.add('selected');
+            } else if (selectedWord === word) {
+                selectedWord = null;
+                word.classList.remove('selected');
+            } else {
+                if (selectedWord.dataset.lang !== word.dataset.lang) {
+                    checkMatch(selectedWord, word);
+                } else {
+                    // Switch selection if same language
+                    selectedWord.classList.remove('selected');
+                    selectedWord = word;
+                    word.classList.add('selected');
+                }
+            }
+        }
+
+        function checkMatch(w1, w2) {
+            const enEl = w1.dataset.lang === 'en' ? w1 : w2;
+            const trEl = w1.dataset.lang === 'tr' ? w1 : w2;
+            const isCorrect = enEl.dataset.matchKey === trEl.dataset.word;
+
+            // Remove selection visual immediately
+            w1.classList.remove('selected');
+            w2.classList.remove('selected');
+            selectedWord = null;
+
+            finalMatches.set(enEl.id, {
+                turkishId: trEl.id,
+                isCorrect: isCorrect,
+                enWord: enEl.dataset.word
+            });
+
+            enEl.classList.add('matched');
+            trEl.classList.add('matched');
+            
+            if (isCorrect) {
+                 enEl.style.backgroundColor = 'rgba(16, 185, 129, 0.2)'; // Hint of green
+                 trEl.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+            }
+
+            playSound('match');
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            if (finalMatches.size === currentWordPairs.length) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            const timeTaken = Math.round((new Date() - startTime) / 1000);
+            let correctCount = 0;
+
+            finalMatches.forEach((match, enId) => {
+                const enEl = document.getElementById(enId);
+                const trEl = document.getElementById(match.turkishId);
+                if (match.isCorrect) {
+                    enEl.classList.add('final-correct-match');
+                    trEl.classList.add('final-correct-match');
+                    correctCount++;
+                } else {
+                    enEl.classList.add('final-wrong-match');
+                    trEl.classList.add('final-wrong-match');
+                }
+                // Reset opacity for clarity
+                enEl.style.opacity = '1'; trEl.style.opacity = '1';
+                enEl.style.filter = 'none'; trEl.style.filter = 'none';
+            });
+
+            // Highlight distractor
+            const remaining = document.querySelector('#turkishWords .word:not(.matched)');
+            if (remaining) remaining.classList.add('final-wrong-match');
+
+            playSound('gameover');
+            createConfetti();
+
+            const score = Math.round((correctCount / currentWordPairs.length) * 100);
+            document.getElementById('result').innerHTML = `<h2 style="font-size:24px;">Score: ${score}%</h2>`;
+            document.getElementById('postGameActions').style.display = 'block';
+
+            saveGameResult({ date: new Date().toLocaleTimeString(), score: score, total: currentWordPairs.length });
+            prepareGeminiAssistant();
+        }
+
+        // --- UTILS ---
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+        
+        function updateTimer() {
+            document.getElementById('timer').textContent = Math.round((new Date() - startTime) / 1000);
+        }
+
+        function playSound(name) {
+            if (soundEnabled && sounds[name]) {
+                sounds[name].currentTime = 0;
+                sounds[name].play().catch(() => {});
+            }
+        }
+
+        // --- UI & MODAL HANDLING ---
+        
+        // Settings Modal
+        const settingsModal = document.getElementById('settingsModal');
+        document.getElementById('settingsBtn').onclick = () => settingsModal.style.display = "flex";
+        document.getElementById('closeSettings').onclick = () => settingsModal.style.display = "none";
+        document.getElementById('applySettingsBtn').onclick = () => {
+            settingsModal.style.display = "none";
+            startGame('new');
+        };
+
+        // Info Modal
+        const infoModal = document.getElementById('infoModal');
+        document.getElementById('infoBtn').onclick = () => infoModal.style.display = "flex";
+        document.getElementById('closeInfo').onclick = () => infoModal.style.display = "none";
+
+        // Results Modal
+        const resultsModal = document.getElementById('resultsModal');
+        document.getElementById('showResultsBtn').onclick = () => {
+             displayResults();
+             resultsModal.style.display = "flex";
+        };
+        document.getElementById('closeResults').onclick = () => resultsModal.style.display = "none";
+
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) e.target.style.display = "none";
+        };
+
+        // EXCEL HANDLING
+        async function loadExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                        const pairs = json.slice(1).map(row => ({
+                            en: row[0] ? row[0].toString().trim() : '',
+                            tr: row[1] ? row[1].toString().trim() : ''
+                        })).filter(p => p.en && p.tr);
+                        if (pairs.length === 0) throw new Error('No pairs');
+                        resolve(pairs);
+                    } catch (error) { reject(error); }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        document.getElementById('excelFile').addEventListener('change', async function(e) {
+            const msg = document.getElementById('loadingMessage');
+            msg.textContent = 'Loading...';
+            try {
+                const loaded = await loadExcelFile(e.target.files[0]);
+                allWordPairs = loaded;
+                msg.textContent = `✅ Loaded ${loaded.length} pairs! Press Apply.`;
+                document.getElementById('createGameSection').style.display = 'block';
+            } catch (error) {
+                msg.textContent = '❌ Error loading file.';
+                allWordPairs = [...defaultWordPairs];
+            }
+        });
+
+        // CREATE STANDALONE GAME
+        document.getElementById('createHtmlButton').addEventListener('click', function() {
+            let htmlContent = document.documentElement.outerHTML;
+            const newWordsJSON = JSON.stringify(allWordPairs);
+            htmlContent = htmlContent.replace(/let defaultWordPairs = \[\s*\{[\s\S]*?\}\s*\];/, `let defaultWordPairs = ${newWordsJSON};`);
+            htmlContent = htmlContent.replace('id="createGameSection" style="display: block;"', 'id="createGameSection" style="display: none;"');
+            
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `WordGame_${new Date().getTime()}.html`;
+            a.click();
+        });
+
+        // GEMINI AI & EXTRAS
+        function prepareGeminiAssistant() {
+            const wrongWords = [];
+            finalMatches.forEach(match => { if (!match.isCorrect) wrongWords.push(match.enWord); });
+            
+            if (wrongWords.length > 0) {
+                document.getElementById('geminiAssistant').style.display = 'block';
+                const select = document.getElementById('wrongWordsSelect');
+                select.innerHTML = '';
+                wrongWords.forEach(w => {
+                    const opt = document.createElement('option');
+                    opt.value = w; opt.textContent = w;
+                    select.appendChild(opt);
+                });
+            }
+        }
+
+        async function callGemini(prompt) {
+            const respBox = document.getElementById('geminiResponse');
+            const loader = document.getElementById('geminiLoading');
+            loader.style.display = 'block'; respBox.textContent = '';
+            
+            try {
+                const res = await fetch(GEMINI_API_URL + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                respBox.textContent = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response.";
+            } catch(e) { respBox.textContent = "AI Error."; }
+            loader.style.display = 'none';
+        }
+
+        document.getElementById('explainWordButton').onclick = () => {
+            const w = document.getElementById('wrongWordsSelect').value;
+            if(w) callGemini(`Define "${w}" simply in English.`);
+        };
+        document.getElementById('exampleSentenceButton').onclick = () => {
+            const w = document.getElementById('wrongWordsSelect').value;
+            if(w) callGemini(`Use "${w}" in a simple sentence.`);
+        };
+
+        // MISC
+        document.getElementById('soundToggle').onclick = function() {
+            soundEnabled = !soundEnabled;
+            this.textContent = soundEnabled ? '🔊 On' : '🔇 Off';
+        };
+
+        document.getElementById('fullscreenBtn').onclick = () => {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+            else document.exitFullscreen();
+        };
+
+        document.getElementById('clearResults').onclick = () => {
+            localStorage.removeItem('gameResults');
+            displayResults();
+        };
+
+        function saveGameResult(r) {
+            const h = JSON.parse(localStorage.getItem('gameResults') || '[]');
+            h.push(r);
+            localStorage.setItem('gameResults', JSON.stringify(h.slice(-20)));
+        }
+
+        function displayResults() {
+            const h = JSON.parse(localStorage.getItem('gameResults') || '[]').reverse();
+            document.getElementById('resultsList').innerHTML = h.length ? 
+                h.map(i => `<div style="padding:10px; border-bottom:1px solid #444; display:flex; justify-content:space-between;"><span>${i.date}</span><span style="color:${i.score>70?'#10b981':'#ef4444'}">${i.score}%</span></div>`).join('') 
+                : '<div style="text-align:center; padding:20px; color:#aaa;">No games played yet.</div>';
+        }
+        
+        function createConfetti() {
+            const colors = ['#f093fb', '#fbbf24', '#34d399', '#60a5fa'];
+            for (let i = 0; i < 50; i++) {
+                const c = document.createElement('div');
+                c.className = 'confetti';
+                c.style.left = Math.random() * 100 + '%';
+                c.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(c);
+                setTimeout(() => c.remove(), 2500);
+            }
+        }
+
+        // AUTO START ON LOAD
+        document.addEventListener('DOMContentLoaded', initGame);
+
+    </script>
+
+</body></html>
