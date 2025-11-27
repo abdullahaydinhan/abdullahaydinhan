@@ -15,142 +15,71 @@
         .nav-link { font-weight: 600; margin: 0 5px; cursor: pointer; }
         .nav-link.active { color: #0d6efd !important; }
 
-        /* --- GELİŞMİŞ SOL YAN MENÜ (SIDEBAR) --- */
-        .left-sidebar {
-            position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1050;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .grade-menu-item {
-            position: relative;
-            background-color: #343a40;
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 0 15px 15px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.2);
-            font-weight: bold;
-            z-index: 1051;
-        }
-
+        /* --- SOL YAN MENÜ --- */
+        .left-sidebar { position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 1050; display: flex; flex-direction: column; gap: 15px; }
+        .grade-menu-item { position: relative; background-color: #343a40; color: white; width: 60px; height: 60px; border-radius: 0 15px 15px 0; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; box-shadow: 3px 3px 10px rgba(0,0,0,0.2); font-weight: bold; z-index: 1051; }
         .grade-menu-item:hover { background-color: #0d6efd; width: 70px; }
-
-        /* MEGA MENU (SUBMENU - ÖNİZLEME ALANI) */
-        .grade-submenu {
-            display: none;
-            position: absolute;
-            left: 70px;
-            top: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 5px 5px 30px rgba(0,0,0,0.25);
-            width: 500px;
-            height: 380px;
-            border: 1px solid #eee;
-            z-index: 1060;
-            overflow: hidden;
-        }
-
+        
+        .grade-submenu { display: none; position: absolute; left: 70px; top: 0; background: white; border-radius: 12px; box-shadow: 5px 5px 30px rgba(0,0,0,0.25); width: 500px; height: 380px; border: 1px solid #eee; z-index: 1060; overflow: hidden; }
         .submenu-layout { display: flex; height: 100%; }
-
-        .submenu-links {
-            width: 40%;
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-right: 1px solid #eee;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            overflow-y: auto;
-        }
-
-        .submenu-preview {
-            width: 60%;
-            padding: 15px;
-            background-color: white;
-            overflow-y: auto;
-        }
-
-        .submenu-link {
-            display: flex;
-            align-items: center;
-            padding: 8px 10px;
-            color: #555;
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: 0.2s;
-        }
+        .submenu-links { width: 40%; background-color: #f8f9fa; padding: 15px; border-right: 1px solid #eee; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+        .submenu-preview { width: 60%; padding: 15px; background-color: white; overflow-y: auto; }
+        .submenu-link { display: flex; align-items: center; padding: 8px 10px; color: #555; text-decoration: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
         .submenu-link:hover { background-color: #e9ecef; color: #0d6efd; transform: translateX(5px); }
         .submenu-link i { width: 25px; }
-
-        /* Hover ile Menüyü Aç */
         .grade-menu-item:hover .grade-submenu { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* Önizleme Listesi */
-        .preview-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border-bottom: 1px solid #f0f0f0;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-        .preview-item:hover { background-color: #f0f7ff; }
-        .preview-item:last-child { border-bottom: none; }
-        .preview-icon {
-            width: 35px; height: 35px;
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 0.9rem;
-        }
-        .preview-text h6 { margin: 0; font-size: 0.85rem; font-weight: 700; color: #333; }
-        .preview-text small { font-size: 0.7rem; color: #888; }
-
-        /* MOBİL UYUMLULUK */
+        /* MOBİL */
         @media (max-width: 768px) {
             .left-sidebar { gap: 8px; }
             .grade-menu-item { width: 40px; height: 40px; font-size: 0.8rem; border-radius: 0 10px 10px 0; }
             .grade-menu-item:hover { width: 50px; }
-            /* Mobilde Mega Menüyü Gizle */
             .grade-menu-item:hover .grade-submenu { display: none !important; } 
             .grade-circle { width: 25px; height: 25px; font-size: 0.9rem; }
         }
+        .grade-circle { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 
-        .grade-circle {
-            width: 35px; height: 35px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem;
-        }
-
-        /* SINIF ETİKETLERİ VE RENKLER */
+        /* SINIF ETİKETLERİ */
         .grade-badge { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 8px; color: white; font-weight: 700; font-size: 0.75rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
         .badge-9 { background: linear-gradient(45deg, #00c6ff, #0072ff); }
         .badge-10 { background: linear-gradient(45deg, #11998e, #38ef7d); }
         .badge-11 { background: linear-gradient(45deg, #fce38a, #f38181); color: #333 !important; }
         .badge-12 { background: linear-gradient(45deg, #ff416c, #ff4b2b); }
 
+        /* KART TASARIMI (GÜNCELLENDİ) */
         .game-card { border: none; border-radius: 16px; transition: all 0.3s ease; background: white; height: 100%; border: 1px solid #eee; cursor: pointer; }
         .game-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: #0d6efd; }
-        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1rem; color: white; }
         
-        /* KATEGORİ RENKLERİ */
+        /* Simge Kutusu */
+        .icon-box { 
+            width: 50px; height: 50px; 
+            border-radius: 12px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.5rem; 
+            color: white; 
+            flex-shrink: 0; /* Küçülmesini engelle */
+        }
+        
+        /* Tür Yazısı (VOCABULARY vb.) */
+        .type-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #6c757d;
+            margin-left: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tarih Kısmı */
+        .date-badge {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* RENKLER */
         .icon-Games { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #d63384; }
         .icon-Interactive_Activities { background-color: #0d6efd; }
         .icon-Videos { background-color: #dc3545; }
@@ -165,6 +94,13 @@
         
         .nav-pills .nav-link { border-radius: 50px; padding: 10px 30px; margin: 0 5px; background: white; border: 2px solid #e9ecef; color: #6c757d; font-weight: 700; transition: all 0.3s; }
         .nav-pills .nav-link.active { background-color: #0d6efd !important; border-color: #0d6efd !important; color: #ffffff !important; transform: scale(1.05); box-shadow: 0 4px 15px rgba(13,110,253,0.3); }
+        .unit-badge { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; background: #eef2ff; color: #4f46e5; padding: 5px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 8px; }
+        
+        /* Önizleme */
+        .preview-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #f0f0f0; transition: 0.2s; cursor: pointer; }
+        .preview-item:hover { background-color: #f0f7ff; }
+        .preview-icon { width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.9rem; }
+        .preview-text h6 { margin: 0; font-size: 0.85rem; font-weight: 700; color: #333; }
     </style>
 </head>
 <body>
@@ -183,16 +119,14 @@
                     <ul class="dropdown-menu border-0 shadow">
                         <li><a class="dropdown-item" onclick="switchView('Vocabulary')"><i class="fa-solid fa-book-open text-success me-2"></i> Vocabulary</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Grammar')"><i class="fa-solid fa-pen-nib text-warning me-2"></i> Grammar</a></li>
-                        <li><a class="dropdown-item" onclick="switchView('Videos')"><i class="fa-solid fa-youtube text-danger me-2"></i> Videos</a></li>
+                        <li><a class="dropdown-item" onclick="switchView('Videos')"><i class="fa-solid fa-clapperboard text-danger me-2"></i> Videos</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Slides')"><i class="fa-solid fa-person-chalkboard text-primary me-2"></i> Slides</a></li>
                         <li><a class="dropdown-item" onclick="switchView('Documents')"><i class="fa-solid fa-file-pdf text-info me-2"></i> Documents</a></li>
                     </ul>
                 </li>
                 <li class="nav-item"><a class="nav-link" id="nav-about" onclick="switchView('about')">About</a></li>
                 <li class="nav-item ms-2"><button class="btn btn-primary rounded-pill px-4 fw-bold btn-sm shadow-sm" data-bs-toggle="modal" data-bs-target="#contactModal">Contact</button></li>
-                <li class="nav-item ms-2">
-                    <a class="nav-link text-secondary" href="admin.html" target="_blank" title="Admin Girişi"><i class="fa-solid fa-lock"></i></a>
-                </li>
+                <li class="nav-item ms-2"><a class="nav-link text-secondary" href="admin.html" target="_blank" title="Admin Girişi"><i class="fa-solid fa-lock"></i></a></li>
             </ul>
         </div>
     </div>
@@ -216,7 +150,7 @@
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Interactive_Activities')" onclick="quickNav('${g}', 'Interactive_Activities')"><i class="fa-solid fa-laptop-code text-primary"></i> Activities</a>
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Vocabulary')" onclick="quickNav('${g}', 'Vocabulary')"><i class="fa-solid fa-book-open text-success"></i> Vocabulary</a>
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Grammar')" onclick="quickNav('${g}', 'Grammar')"><i class="fa-solid fa-pen-nib text-warning"></i> Grammar</a>
-                            <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Videos')" onclick="quickNav('${g}', 'Videos')"><i class="fa-solid fa-youtube text-danger"></i> Videos</a>
+                            <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Videos')" onclick="quickNav('${g}', 'Videos')"><i class="fa-solid fa-clapperboard text-danger"></i> Videos</a>
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Slides')" onclick="quickNav('${g}', 'Slides')"><i class="fa-solid fa-person-chalkboard text-dark"></i> Slides</a>
                             <a href="#" class="submenu-link" onmouseover="showPreview('${g}', 'Documents')" onclick="quickNav('${g}', 'Documents')"><i class="fa-solid fa-file-pdf text-info"></i> Documents</a>
                         </div>
@@ -282,7 +216,6 @@
 <div class="modal fade" id="contactModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fa-solid fa-envelope"></i> Contact Teacher</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4 text-center"><i class="fa-solid fa-paper-plane fa-3x text-primary mb-3"></i><p class="fs-5">Hello! Do you have any questions?</p><p class="text-muted">Feel free to send me an email.</p><div class="alert alert-light border mt-3"><strong><i class="fa-solid fa-at"></i> Email:</strong><br><a href="mailto:abdullahaydınhan@gmail.com" class="text-decoration-none fw-bold text-break">abdullahaydınhan@gmail.com</a></div></div><div class="modal-footer border-0 justify-content-center pb-4"><button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Close</button></div></div></div></div>
 
 <script>
-    // --- KİMLİK BİLGİLERİ (GÜVENLİ) ---
     const GITHUB_USERNAME = "abdullahaydinhan"; 
     const REPO_NAME = "englishgamehub"; 
 
@@ -290,10 +223,11 @@
     let currentMode = 'home'; 
     let currentGrade = '9TH_GRADE';
     
+    // Video İkonu Güncellendi: fa-clapperboard
     const CONFIG = {
         'Games': { title: '🎮 Interactive Games', subtitle: 'Play and learn with our game collection.', icon: 'fa-gamepad' },
         'Interactive_Activities': { title: '🧩 Interactive Activities', subtitle: 'Digital exercises and quizzes.', icon: 'fa-laptop-code' },
-        'Videos': { title: '🎬 Educational Videos', subtitle: 'Watch and learn.', icon: 'fa-youtube' },
+        'Videos': { title: '🎬 Educational Videos', subtitle: 'Watch and learn.', icon: 'fa-clapperboard' },
         'Vocabulary': { title: '📖 Vocabulary & Resources', subtitle: 'PDFs, Word documents, and Study Lists.', icon: 'fa-book-open' },
         'Grammar': { title: '✍️ Grammar Exercises', subtitle: 'Master the rules of English.', icon: 'fa-pen-nib' },
         'Slides': { title: '📊 Presentations', subtitle: 'Lesson slides and summaries.', icon: 'fa-person-chalkboard' },
@@ -373,32 +307,39 @@
         renderContent();
     }
 
-    // --- ADİL VİTRİN ALGORİTMASI (ROUND ROBIN) ---
+    // --- YENİLENEN VİTRİN ALGORİTMASI ---
     function renderHomeLatest() {
         const container = document.getElementById('home-showcase');
         
-        // Verileri kategorilere ayır
-        let categories = {};
-        allData.forEach(item => {
-            if(item.isVisible === false) return;
-            if(!categories[item.source]) categories[item.source] = [];
-            categories[item.source].push(item);
-        });
+        if (allData.length <= 10) {
+            // 10'dan azsa hepsini tarihe göre bas
+            let html = "";
+            allData.forEach(item => { if(item.isVisible !== false) html += createCardHTML(item); });
+            container.innerHTML = html;
+            return;
+        }
 
+        // 10'dan çoksa algoritmayı çalıştır
+        const allGames = allData.filter(i => i.source === 'Games' && i.isVisible !== false);
+        const allOthers = allData.filter(i => i.source !== 'Games' && i.isVisible !== false);
         let showcaseItems = [];
-        let keys = Object.keys(categories);
-        let maxPerRound = 20; 
         
-        // Her kategoriden sırayla 1 tane al (Oyun, Video, Slayt...)
-        for(let i=0; i<maxPerRound; i++) {
-            let itemAdded = false;
-            keys.forEach(key => {
-                if(categories[key].length > 0 && showcaseItems.length < 12) { 
-                    showcaseItems.push(categories[key].shift()); 
-                    itemAdded = true;
-                }
-            });
-            if(!itemAdded || showcaseItems.length >= 12) break;
+        // 1. En az 4 Oyun Al (Varsa)
+        let gamesToTake = Math.min(4, allGames.length);
+        showcaseItems.push(...allGames.slice(0, gamesToTake));
+        
+        // 2. Kalan boşluğu Diğerlerinden doldur
+        let remainingSlots = 10 - showcaseItems.length;
+        if(remainingSlots > 0) {
+            // Oyunlar hariç kalan her şeyi (zaten tarih sıralı) al
+            showcaseItems.push(...allOthers.slice(0, remainingSlots));
+        }
+
+        // 3. Hala 10 olmadıysa (yeterince diğer içerik yoksa) kalan oyunlardan tamamla
+        if(showcaseItems.length < 10) {
+             let moreGamesNeeded = 10 - showcaseItems.length;
+             // İlk aldığımız oyunlardan sonrakileri al
+             showcaseItems.push(...allGames.slice(gamesToTake, gamesToTake + moreGamesNeeded));
         }
 
         let html = "";
@@ -417,7 +358,8 @@
 
     function createCardHTML(item) {
         const displayTitle = item.title || item.name.replace(/\.(html|pdf|docx|doc|xlsx|xls|ppt|pptx)$/i, '').replace(/_/g, ' ');
-        const badge = item.unit ? `<span class="badge bg-light text-primary border mb-2">${item.unit}</span>` : '';
+        const badge = item.unit ? `<span class="unit-badge">${item.unit}</span>` : '';
+        const dateStr = item.date ? `<span class="date-badge"><i class="fa-regular fa-clock me-1"></i>${item.date}</span>` : '';
         
         const gradeNum = item.grade.replace('TH_GRADE', ''); 
         const gradeBadgeClass = `badge-${gradeNum}`;
@@ -435,18 +377,23 @@
             iconClass = getFileIcon(item.name);
         }
 
+        // Tür Etiketi (VOCABULARY vb.)
+        const typeLabel = `<span class="type-label">${item.source.replace('_', ' ')}</span>`;
+
         return `
             <div class="col">
                 <a href="${item.path}" class="text-decoration-none text-dark" target="_blank">
                     <div class="game-card h-100 position-relative">
                         ${gradeLabel}
                         <div class="card-body p-4">
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex align-items-center mb-3">
                                 <div class="icon-box ${bgClass}"><i class="fa-solid ${iconClass}"></i></div>
+                                ${typeLabel}
                             </div>
                             ${badge}
                             <h5 class="fw-bold mb-2 text-truncate">${displayTitle}</h5>
-                            <p class="text-muted small mb-0 text-truncate">${item.description || 'Click to view.'}</p>
+                            <p class="text-muted small mb-2 text-truncate">${item.description || 'Click to view.'}</p>
+                            ${dateStr}
                         </div>
                     </div>
                 </a>
